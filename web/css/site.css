@@ -1,0 +1,394 @@
+/* Основные стили */
+* {
+    box-sizing: border-box;
+}
+
+.wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+}
+
+body, html {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    height: 100%;
+    margin: 0;
+}
+
+/* Шапка */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background-color: #366de4;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+.header-logo {
+    width: 192px;
+    height: 108px;
+}
+
+.header-right {
+    display: flex;
+    gap: 20px; /* Расстояние между иконками */
+}
+
+/* Иконки в header */
+.header-icon {
+    font-size: 26px;
+    color: #fff;
+    position: relative;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.header-icon:hover {
+    color: #a8caff;
+}
+
+.header-icon .tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 40px;
+    right: 0;
+    background-color: #4b4b4b;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-size: 12px;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 10;
+}
+
+.header-icon:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Боковая панель */
+.sidebar {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 60px;
+    height: calc(100vh - 70px);
+    background-color: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+    border-right: 1px solid #ddd;
+    z-index: 1;
+}
+
+/* Иконки на боковой панели */
+.icon-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    color: #6190f5;
+    font-size: 24px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.icon-link:hover,
+.icon-link.active {
+    background-color: #e6e6e6;
+    border-radius: 8px;
+    color: #366de4;
+    text-decoration: none;
+}
+
+.icon-link.active::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 10%;
+    bottom: 10%;
+    width: 4px;
+    background-color: #366de4;
+    border-radius: 2px;
+}
+
+/* Подсказки (tooltip) для боковой панели */
+.sidebar .tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    left: 64px;
+    background-color: #4b4b4b;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-size: 14px;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 10;
+}
+
+.icon-link:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Футер */
+.footer {
+    background-color: #f5f5f5;
+    font-size: 0.9em;
+    height: 60px;
+}
+
+.footer > .container {
+    padding: 0 15px;
+}
+
+/* Общие стили */
+a.asc:after, a.desc:after {
+    content: '';
+    left: 3px;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border: solid 5px transparent;
+    margin: 4px;
+}
+
+a.asc:after {
+    border-bottom: solid 7px #212529;
+    border-top-width: 0;
+}
+
+a.desc:after {
+    border-top: solid 7px #212529;
+    border-bottom-width: 0;
+}
+
+.grid-view th {
+    white-space: nowrap;
+}
+
+.hint-block {
+    display: block;
+    margin-top: 5px;
+    color: #999;
+}
+
+.error-summary {
+    color: #a94442;
+    background: #fdf7f7;
+    border-left: 3px solid #eed3d7;
+    padding: 10px 20px;
+    margin-bottom: 15px;
+}
+
+.nav li > form > button.logout:focus,
+.nav li > form > button.logout:hover {
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+/* Основной контейнер */
+.container {
+    margin-left: 80px;
+    margin-right: 0px;
+    padding-top: 100px; /* Учитываем высоту шапки */
+    padding-bottom: 20px;
+    display: grid;
+    gap: 20px;
+    min-height: calc(100vh - 100px); /* Полная высота экрана минус высота шапки */
+    align-content: start;
+    max-width: 1500px;
+}
+
+/* Секция с карточками */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); /* Более крупные карточки */
+    gap: 20px; /* Зазор между карточками */
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+/* Карточка */
+.card {
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    align-items: center;
+    display: flex;
+    position: relative;
+    flex: 1;
+    transition: transform 0.3s ease; /* Добавлен эффект при наведении */
+    flex-direction: row;
+    gap: 16px;
+}
+
+.card-image {
+    width: 40px;
+    height: 40px;
+}
+
+.card-image-m {
+    width: 30px;
+    height: 40px;
+}
+
+.card-image-s {
+    width: 30px;
+    height: 30px;
+}
+
+.card:last-child {
+    margin-right: 0;
+}
+
+.card-title {
+    font-size: 28px;
+    color: #366de4;
+    margin-bottom: 0;
+}
+
+.card-text {
+    font-size: 16px;
+}
+
+.card:hover {
+    transform: translateY(-5px); /* Небольшое поднятие карточки при наведении */
+}
+
+.card h3 {
+    font-size: 1.1em;
+    color: #333;
+    margin-bottom: 10px; /* Добавляем отступ под заголовком */
+}
+
+.card p {
+    font-size: 1.2em;
+    color: #333;
+    margin: 5px 0 0;
+}
+
+/* Разделы с заданиями и материалами */
+.tasks-materials {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr)); /* Более крупные карточки */
+    gap: 20px; /* Зазор между карточками */
+}
+
+
+.newrequest-section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    flex: 1;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.task-section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        flex: 1;
+    margin-right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.material-section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    flex: 1;
+    margin-right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    height: fit-content;
+}
+
+.task-section:last-child, .material-section:last-child {
+    margin-right: 0;
+}
+
+.tabs {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.tabs button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 5px 15px;
+}
+
+.tabs button.active {
+    border-bottom: 2px solid #366de4;
+}
+
+.material-but button {
+    background-color: #fcfcfc;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 5px 15px;
+    border: none;
+}
+
+.material-but button.active {
+    border-bottom: 2px solid #366de4;
+}
+
+.task-list {
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+    color: #888;
+}
+
+.tab-image {
+    width: 40px;
+    height: 40px;
+}
+
+.tab-title {
+    font-size: 24px;
+    margin-bottom: 0;
+}
+
+.sub-text {
+    font-size: 12pt;
+}
