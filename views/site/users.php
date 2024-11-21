@@ -9,6 +9,7 @@ $this->title = 'Учебный центр КТЭП';
 <!-- Основной контент -->
 <div class="container">
     <main class="content">
+    <h1>Пользователи</h1>
         <!-- Статистические карточки -->
         <section class="cards">
             <div class="card">

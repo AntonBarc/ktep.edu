@@ -19,13 +19,21 @@ class SiteController extends Controller
     {
         return [
             'access' => [
-                'class' => AccessControl::className(),
-                'only' => ['logout'],
+                'class' => \yii\filters\AccessControl::class,
+                'only' => ['index'],
                 'rules' => [
                     [
-                        'actions' => ['logout'],
                         'allow' => true,
-                        'roles' => ['@'],
+                        'actions' => ['index', 'view'], // Разрешить эти действия
+                        'roles' => ['@'], // Только для авторизованных пользователей
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['login'], // Разрешить действие login
+                        'roles' => ['?'], // Только для гостей
+                    ],
+                    [
+                        'allow' => false, // Запретить всё остальное
                     ],
                 ],
             ],
@@ -72,12 +80,12 @@ class SiteController extends Controller
     public function actionLogin()
     {
         if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
+            return $this->goHome(); // Перенаправляем авторизованного пользователя на главную
         }
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+            return $this->goHome(); // После успешного входа на главную
         }
 
         $model->password = '';
@@ -85,6 +93,7 @@ class SiteController extends Controller
             'model' => $model,
         ]);
     }
+
 
     /**
      * Logout action.
@@ -125,4 +134,30 @@ class SiteController extends Controller
     {
         return $this->render('about');
     }
+
+    public function actionMaterials()
+    {
+        return $this->render('materials');
+    }
+
+    public function actionReports()
+    {
+        return $this->render('reports');
+    }
+
+    public function actionSettings()
+    {
+        return $this->render('settings');
+    }
+
+    public function actionUsers()
+    {
+        return $this->render('users');
+    }
+
+    public function actionProfile()
+    {
+        return $this->render('profile');
+    }
+    
 }

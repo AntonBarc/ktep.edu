@@ -6,6 +6,7 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
+    'language' => 'ru-RU',
     'bootstrap' => ['log'],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
@@ -21,6 +22,7 @@ $config = [
         ],
         'user' => [
             'identityClass' => 'app\models\User',
+            'loginUrl' => ['site/login'],
             'enableAutoLogin' => true,
         ],
         'errorHandler' => [
@@ -43,14 +45,16 @@ $config = [
             ],
         ],
         'db' => $db,
-        
+
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'materials/create' => 'materials/create',
+                'materials/upload' => 'materials/upload',
             ],
         ],
-        
+
     ],
     'params' => $params,
 ];

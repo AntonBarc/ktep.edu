@@ -41,6 +41,7 @@ body, html {
 
 .header-right {
     display: flex;
+    padding-right: 20px;
     gap: 20px; /* Расстояние между иконками */
 }
 
@@ -78,6 +79,69 @@ body, html {
     opacity: 1;
 }
 
+/* Дроп меню */
+.profile-menu {
+    position: relative;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: -150px;
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 200px;
+    z-index: 10;
+    transform-origin: top right;
+    transform: translateX(0);
+}
+
+.dropdown-menu[style*="display: block"] {
+    transform: scale(1);
+    opacity: 1;
+}
+
+@media (max-width: 500px) {
+    .dropdown-menu {
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+    }
+}
+
+.dropdown-menu.adjust-left {
+    left: auto;
+    right: 0;
+    transform: none;
+}
+
+.dropdown-menu a,
+.dropdown-menu p {
+    display: block;
+    padding: 10px 15px;
+    color: #333;
+    text-decoration: none;
+}
+
+.dropdown-menu a:hover {
+    background-color: #f5f5f5;
+}
+
+.username {
+    font-weight: bold;
+    padding: 10px 15px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ddd;
+}
+
+.profile-icon {
+    cursor: pointer;
+}
+
 /* Боковая панель */
 .sidebar {
     position: fixed;
@@ -99,11 +163,11 @@ body, html {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 40px;
     color: #6190f5;
     font-size: 24px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     text-decoration: none;
     transition: background-color 0.3s ease, color 0.3s ease;
     position: relative;
@@ -121,7 +185,7 @@ body, html {
 .icon-link.active::before {
     content: '';
     position: absolute;
-    left: 2px;
+    left: 0px;
     top: 10%;
     bottom: 10%;
     width: 4px;
@@ -220,123 +284,72 @@ a.desc:after {
 }
 
 /* Секция с карточками */
-.cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); /* Более крупные карточки */
-    gap: 20px; /* Зазор между карточками */
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-/* Карточка */
 .card {
     background-color: #fff;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 8px; /* Уменьшение внутреннего отступа */
+    border-radius: 6px; /* Немного уменьшили скругление */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     align-items: center;
     display: flex;
     position: relative;
     flex: 1;
-    transition: transform 0.3s ease; /* Добавлен эффект при наведении */
+    transition: transform 0.3s ease;
     flex-direction: row;
-    gap: 16px;
-}
-
-.card-image {
-    width: 40px;
-    height: 40px;
-}
-
-.card-image-m {
-    width: 30px;
-    height: 40px;
-}
-
-.card-image-s {
-    width: 30px;
-    height: 30px;
-}
-
-.card:last-child {
-    margin-right: 0;
+    gap: 10px; /* Уменьшили расстояние между изображением и текстом */
 }
 
 .card-title {
-    font-size: 28px;
+    font-size: 20px; /* Уменьшение размера заголовка */
     color: #366de4;
     margin-bottom: 0;
 }
 
 .card-text {
-    font-size: 16px;
+    font-size: 14px; /* Уменьшение размера текста */
 }
+
+.card-image {
+    width: 30px; /* Уменьшение размера изображения */
+    height: 30px;
+}
+
+.card-image-m {
+    width: 24px;
+    height: 30px;
+}
+
+.card-image-s {
+    width: 20px;
+    height: 20px;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Уменьшили минимальный размер карточек */
+    gap: 15px; /* Уменьшили расстояние между карточками */
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
 
 .card:hover {
-    transform: translateY(-5px); /* Небольшое поднятие карточки при наведении */
+    transform: translateY(-3px); /* Уменьшили эффект поднятия при наведении */
 }
 
-.card h3 {
-    font-size: 1.1em;
-    color: #333;
-    margin-bottom: 10px; /* Добавляем отступ под заголовком */
-}
-
-.card p {
-    font-size: 1.2em;
-    color: #333;
-    margin: 5px 0 0;
-}
 
 /* Разделы с заданиями и материалами */
-.tasks-materials {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 30px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr)); /* Более крупные карточки */
-    gap: 20px; /* Зазор между карточками */
-}
-
-
-.newrequest-section {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    flex: 1;
-    margin-right: 10px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    width: 100%;
-}
-
 .task-section {
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        flex: 1;
-    margin-right: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    width: 100%;
-}
-
-.material-section {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     flex: 1;
     margin-right: 10px;
+    margin-top: 30px;
     display: flex;
     flex-direction: column;
     gap: 15px;
-    width: 100%;
-    height: fit-content;
+    width: 50%;
 }
 
 .task-section:last-child, .material-section:last-child {
@@ -391,4 +404,54 @@ a.desc:after {
 
 .sub-text {
     font-size: 12pt;
+}
+
+/* Центрирование формы */
+.centered-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Центрирование по высоте */
+    background-color: #f8f9fa;
+    padding: 20px;
+}
+
+.centered-form-container {
+    width: 100%;
+    max-width: 400px;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.site-login h1 {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 30px; /* Увеличенный отступ вниз */
+    text-align: center; /* Выравнивание по центру */
+}
+
+.site-login .form-group {
+    display: flex;
+    justify-content: center; /* Центрирование формы ввода */
+    flex-direction: column; /* Поля располагаются друг под другом */
+    margin-bottom: 15px;
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+.help-text {
+    font-size: 0.85rem;
+    color: #999;
 }
