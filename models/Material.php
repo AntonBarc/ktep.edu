@@ -8,15 +8,17 @@ class Material extends ActiveRecord
 {
     public static function tableName()
     {
-        return 'materials'; // Убедитесь, что у вас есть таблица "materials" в базе данных
+        return 'materials';
     }
 
     public function rules()
     {
         return [
-            [['name', 'type'], 'required'],
-            ['author_id', 'integer'],
-            ['created_at', 'safe'],
+            [['name', 'type', 'author_id'], 'required'],
+            [['name'], 'string', 'max' => 255],
+            [['type'], 'string', 'max' => 100],
+            [['author_id'], 'integer'],
+            [['created_at'], 'safe'],
         ];
     }
 }

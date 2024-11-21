@@ -41,7 +41,7 @@ AppAsset::register($this);
                         </div>
                         <div class="dropdown-menu">
                             <p class="username">Антон Барчей</p>
-                            <a href="<?= Url::to(['site/materials']) ?>">Портал пользователя</a>
+                            <a href="<?= Url::to(['site/materials/index']) ?>">Портал пользователя</a>
                             <a href="<?= Url::to(['site/profile']) ?>">Мой профиль</a>
                             <?= Html::a('Выйти', ['site/logout'], [
                                 'data-method' => 'post',
@@ -58,7 +58,7 @@ AppAsset::register($this);
                     <i class="fas fa-home"></i>
                     <span class="tooltip">Главная</span>
                 </a>
-                <a href="<?= Url::to(['site/materials']) ?>" class="icon-link">
+                <a href="<?= Url::to(['/materials/index']) ?>" class="icon-link">
                     <i class="fas fa-file-alt"></i>
                     <span class="tooltip">Учебные материалы</span>
                 </a>
