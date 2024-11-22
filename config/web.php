@@ -50,8 +50,7 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-                'materials' => 'materials/index',
-                'materials/create' => 'materials/create',
+                'material/create' => 'material/create',
                 'materials/upload' => 'materials/upload',
             ],
         ],
