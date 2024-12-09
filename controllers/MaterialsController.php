@@ -12,29 +12,23 @@ class MaterialsController extends Controller
     public function actionIndex()
     {
         $materials = Material::find()->all();
-        return $this->render('index', ['materials' => $materials]);
+        $model = new Material(); // Создание модели для формы загрузки файла
+        return $this->render('index', [
+            'materials' => $materials,
+            'model' => $model,
+        ]);
     }
+
 
     public function actionCreate()
-{
-    $model = new Material();
-
-    if (Yii::$app->request->isPost && $model->load(Yii::$app->request->post())) {
-        // Загрузка файла
-        $uploadedFile = UploadedFile::getInstance($model, 'file');
-        if ($uploadedFile) {
-            $filePath = 'uploads/' . $uploadedFile->baseName . '.' . $uploadedFile->extension;
-            $uploadedFile->saveAs($filePath);
-            $model->file_path = $filePath;  // Сохраняем путь к файлу в базе
+    {
+        $model = new Material();  // Создание новой модели
+        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+            // Логика сохранения материала
         }
-        // Сохранение материала
-        if ($model->save()) {
-            return $this->redirect(['index']);
-        }
+        return $this->render('create', ['model' => $model]);  // Передача модели в представление
     }
 
-    return $this->render('create', ['model' => $model]);
-}
 
 
 

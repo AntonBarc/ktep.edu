@@ -10,15 +10,12 @@ class m241122_111910_add_file_path_to_materials extends Migration
     /**
      * {@inheritdoc}
      */
-    public function safeUp()
-    {
-
-    }
+    public function safeUp() {}
 
     public function up()
-{
-    $this->addColumn('{{%materials}}', 'file_path', $this->string()->notNull());
-}
+    {
+        $this->addColumn('{{%materials}}', 'file_path', $this->string()->notNull());
+    }
 
 
     /**
