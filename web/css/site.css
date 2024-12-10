@@ -15,6 +15,7 @@ body, html {
     background-color: #f5f5f5;
     height: 100%;
     margin: 0;
+    padding: 0;
 }
 
 /* Шапка */
@@ -454,4 +455,81 @@ a.desc:after {
 .help-text {
     font-size: 0.85rem;
     color: #999;
+}
+
+.mat-container {
+    display: flex;
+}
+
+.mat-sidebar {
+    width: 250px;
+    background-color: #ffffff;
+    border-right: 1px solid #ddd;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.mat-sidebar h2, .mat-sidebar h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.mat-sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.mat-sidebar ul li {
+    margin: 10px 0;
+}
+
+.mat-sidebar ul li a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: 500;
+}
+
+.mat-main-content {
+    flex: 1;
+    padding: 20px;
+}
+
+.upload-btn, .create-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.upload-btn {
+    background-color: #007bff;
+    color: #fff;
+    margin-right: 10px;
+}
+
+.create-btn {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.content-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.content-table th, .content-table td {
+    padding: 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.content-table th {
+    background-color: #f1f1f1;
+    font-weight: bold;
+}
+
+.content-table tbody tr:hover {
+    background-color: #f9f9f9;
 }
