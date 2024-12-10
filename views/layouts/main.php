@@ -84,6 +84,7 @@ AppAsset::register($this);
     <?php $this->endBody() ?>
     <script src="<?= Url::to('@web/js/sidebar.js') ?>"></script>
     <script src="<?= Url::to('@web/js/dropmenu.js') ?>"></script>
+    <script src="<?= Url::to('@web/js/uploadMaterial.js') ?>"></script>
 
 </body>
 

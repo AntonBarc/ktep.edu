@@ -459,14 +459,16 @@ a.desc:after {
 
 .mat-container {
     display: flex;
+    flex-direction: row; 
+    gap: 20px; 
+    align-items: stretch;
+    height: calc(100vh - 100px);
 }
 
+
 .mat-sidebar {
-    width: 250px;
-    background-color: #ffffff;
-    border-right: 1px solid #ddd;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    flex-shrink: 0;
 }
 
 .mat-sidebar h2, .mat-sidebar h3 {
@@ -491,8 +493,12 @@ a.desc:after {
 }
 
 .mat-main-content {
-    flex: 1;
+    flex: 1; /* Заставляем основной контент занимать оставшееся пространство */
     padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex; /* Если нужно, чтобы содержимое внутри тоже растягивалось */
+    flex-direction: column; /* Это сохраняет вертикальное расположение внутри */
 }
 
 .upload-btn, .create-btn {

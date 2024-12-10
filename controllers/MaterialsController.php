@@ -36,19 +36,31 @@ class MaterialsController extends Controller
     {
         $model = new Material();
 
-        if ($model->load(Yii::$app->request->post())) {
+        if (Yii::$app->request->isPost) {
             $model->file = UploadedFile::getInstance($model, 'file');
             if ($model->file && $model->validate()) {
                 $filePath = 'uploads/' . $model->file->baseName . '.' . $model->file->extension;
-                $model->file->saveAs($filePath);
-                $model->file_path = $filePath;
-                $model->created_at = date('Y-m-d H:i:s');
-                $model->save(false);
-                return $this->redirect(['upload']);
+                if ($model->file->saveAs($filePath)) {
+                    // Заполняем данные для сохранения в базе данных
+                    $model->title = $model->file->baseName;
+                    $model->file_path = $filePath;
+                    $model->created_at = date('Y-m-d H:i:s');
+                    $model->save(false);
+
+                    // Возвращаем JSON-ответ об успешной загрузке
+                    return $this->asJson(['success' => true, 'message' => 'Файл успешно загружен']);
+                }
             }
         }
 
-        $materials = Material::find()->all();
-        return $this->render('upload', ['model' => $model, 'materials' => $materials]);
+        return $this->asJson(['success' => false, 'message' => 'Ошибка при загрузке файла']);
     }
+
+
+    public function actionFetchTableData()
+{
+    $materials = Material::find()->all();
+    return $this->renderPartial('_table_rows', ['materials' => $materials]);
+}
+
 }
