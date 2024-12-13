@@ -1,51 +1,51 @@
 <?php
 
-/** @var yii\web\View $this */
+use yii\helpers\Html;
 
-use yii\helpers\Url;
+/* @var $this yii\web\View */
+/* @var $users app\models\User[] */
 
-$this->title = 'Учебный центр КТЭП';
+$this->title = 'Список пользователей';
 ?>
-<!-- Основной контент -->
 <div class="container">
     <main class="content">
-    <h1>Пользователи</h1>
-        <!-- Статистические карточки -->
-        <section class="cards">
-            <div class="card">
-                <img src="<?= Url::to('@web/images/cards/material.png') ?>" alt="Материалы" class="card-image-m">
-                <div>
-                    <div class="card-title">15</div>
-                    <div class="card-text">материалов</div>
-                </div>
-            </div>
-            <div class="card">
-                <img src="<?= Url::to('@web/images/cards/user.png') ?>" alt="Пользователи" class="card-image">
-                <div>
-                    <div class="card-title">346</div>
-                    <div class="card-text">пользователей</div>
-                </div>
-            </div>
-            <div class="card">
-                <img src="<?= Url::to('@web/images/cards/group.png') ?>" alt="Группы" class="card-image">
-                <div>
-                    <div class="card-title">2</div>
-                    <div class="card-text">группы</div>
-                </div>
-            </div>
-        </section>
+        <div class="mat-container">
+            <aside class="mat-sidebar">
+                <h2>Пользователи</h2>
+                <ul>
+                    <li><a href="#">Все пользователи</a></li>
+                    <li><a href="#">Администраторы</a></li>
+                    <li><a href="#">Преподаватели</a></li>
+                    <li><a href="#">Студенты</a></li>
+                </ul>
+            </aside>
 
-        <!-- Задачи и материалы -->
-        <div class="task-section">
-            <h4>Непроверенные задания</h4>
-            <div class="tabs">
-                <button class="active">Мои 0</button>
-                <button>Все 0</button>
-            </div>
-            <div class="task-list">
-                <p>Пока нет заданий на проверку</p>
-            </div>
+            <main class="mat-main-content">
+                <header style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>Список пользователей</h1>
+                </header>
+
+                <table class="content-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Имя пользователя</th>
+                            <th>Auth Key</th>
+                            <th>Access Token</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($users as $user): ?>
+                            <tr>
+                                <td><?= Html::encode($user->id) ?></td>
+                                <td><?= Html::encode($user->username) ?></td>
+                                <td><?= Html::encode($user->authKey) ?></td>
+                                <td><?= Html::encode($user->accessToken) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </main>
         </div>
     </main>
-</div>
 </div>

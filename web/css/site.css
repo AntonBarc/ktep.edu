@@ -277,7 +277,10 @@ a.desc:after {
     margin-right: 0px;
     padding-top: 100px; /* Учитываем высоту шапки */
     padding-bottom: 20px;
-    display: grid;
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Полная высота экрана */
+    overflow: hidden;
     gap: 20px;
     min-height: calc(100vh - 100px); /* Полная высота экрана минус высота шапки */
     align-content: start;
@@ -296,6 +299,8 @@ a.desc:after {
     flex: 1;
     transition: transform 0.3s ease;
     flex-direction: row;
+    text-decoration: none; /* Убирает подчеркивание */
+    color: inherit; /* Сохраняет цвет текста */
     gap: 10px; /* Уменьшили расстояние между изображением и текстом */
 }
 
@@ -307,6 +312,7 @@ a.desc:after {
 
 .card-text {
     font-size: 14px; /* Уменьшение размера текста */
+    color: #366de4;
 }
 
 .card-image {
@@ -332,6 +338,10 @@ a.desc:after {
     margin-top: 10px;
 }
 
+.card:hover, .card:focus, .card:active {
+    text-decoration: none; /* Убирает подчеркивание в этих состояниях */
+    color: inherit; /* Сохраняет цвет текста */
+}
 
 .card:hover {
     transform: translateY(-3px); /* Уменьшили эффект поднятия при наведении */
@@ -457,18 +467,13 @@ a.desc:after {
     color: #999;
 }
 
-.mat-container {
-    display: flex;
-    flex-direction: row; 
-    gap: 20px; 
-    align-items: stretch;
-    height: calc(100vh - 100px);
-}
-
-
 .mat-sidebar {
+    flex-shrink: 0; /* Фиксированный размер */
+    position: sticky; /* Закрепляем содержимое */
+    top: 0; /* Фиксация сверху страницы */
     width: 200px;
-    flex-shrink: 0;
+    height: calc(100vh - 100px); /* Полная высота минус шапка */
+    overflow-y: auto; /* Если содержимое больше, включить прокрутку только для sidebar */
 }
 
 .mat-sidebar h2, .mat-sidebar h3 {
@@ -492,27 +497,52 @@ a.desc:after {
     font-weight: 500;
 }
 
+/* Обеспечение прокрутки только для mat-main-content */
 .mat-main-content {
-    flex: 1; /* Заставляем основной контент занимать оставшееся пространство */
+    flex: 1;
     padding: 20px;
     background-color: #ffffff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    display: flex; /* Если нужно, чтобы содержимое внутри тоже растягивалось */
-    flex-direction: column; /* Это сохраняет вертикальное расположение внутри */
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto; /* Прокрутка для основного контента */
+    height: calc(100vh - 100px); /* Высота для прокрутки минус шапка */
+}
+
+/* Блокировка прокрутки основного контейнера */
+.mat-container {
+    display: flex;
+    flex-direction: row; 
+    gap: 20px; 
+    height: calc(100vh - 100px); /* Учитываем высоту шапки */
+    overflow: hidden; /* Блокируем прокрутку для mat-container */
+}
+
+.button-container {
+    display: flex;
+    gap: 10px; /* Расстояние между кнопками */
+    margin-top: 20px; /* Отступ от нижнего элемента */
+    align-items: center; /* Выравнивание по вертикали */
 }
 
 .upload-btn, .create-btn {
-    padding: 10px 15px;
+    padding: 10px 20px; /* Внутренние отступы */
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px; /* Размер текста */
+    height: 45px; /* Высота кнопок */
+    width: 120px; /* Ширина кнопок */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box; /* Учитываем padding в ширине */
 }
 
 .upload-btn {
     background-color: #007bff;
     color: #fff;
-    margin-right: 10px;
+    margin-bottom: 15px;
 }
 
 .create-btn {

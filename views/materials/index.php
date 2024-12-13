@@ -5,6 +5,7 @@ use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
 /* @var $materials app\models\Material[] */
+/* @var $model app\models\Material */
 
 $this->title = 'Список материалов';
 ?>
@@ -23,20 +24,22 @@ $this->title = 'Список материалов';
             </aside>
 
             <main class="mat-main-content">
-                <header>
+                <header style="display: flex; justify-content: space-between; align-items: center;">
                     <h1>Новый проект (Антон Барчей)</h1>
-                    <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
-
-                    <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
-                    <?= $form->field($model, 'file')->fileInput() ?>
-
-                    <div class="form-group">
-                        <?= Html::submitButton('Загрузить', ['class' => 'btn btn-primary']) ?>
+                    <div class="button-container">
+                        <button class="create-btn">Создать</button>
+                        <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
+                        <?= $form->field($model, 'file', [
+                            'template' => '{input}{error}', // Убираем метку и оставляем только поле
+                        ])->fileInput([
+                            'style' => 'display: none;', // Скрываем стандартный элемент "Обзор"
+                            'id' => 'fileInput',
+                        ]) ?>
+                        <button class="upload-btn" type="button" id="uploadBtn">Загрузить</button>
+                        <?php ActiveForm::end(); ?>
                     </div>
-
-                    <?php ActiveForm::end(); ?>
-                    <button class="create-btn">Создать</button>
                 </header>
+
                 <table class="content-table">
                     <thead>
                         <tr>
@@ -59,3 +62,15 @@ $this->title = 'Список материалов';
         </div>
     </main>
 </div>
+
+<script>
+    // Обработчик кнопки загрузки
+    document.getElementById('uploadBtn').addEventListener('click', function() {
+        document.getElementById('fileInput').click(); // Открываем проводник для выбора файла
+    });
+
+    // Отправка формы автоматически при выборе файла
+    document.getElementById('fileInput').addEventListener('change', function() {
+        this.form.submit(); // Отправляем форму после выбора файла
+    });
+</script>

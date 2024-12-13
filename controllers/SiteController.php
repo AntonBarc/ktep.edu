@@ -9,6 +9,8 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\User;
+
 
 class SiteController extends Controller
 {
@@ -152,12 +154,17 @@ class SiteController extends Controller
 
     public function actionUsers()
     {
-        return $this->render('users');
+        // Получаем всех пользователей из базы данных
+        $users = User::find()->all();
+
+        // Передаем данные в представление
+        return $this->render('users', [
+            'users' => $users,
+        ]);
     }
 
     public function actionProfile()
     {
         return $this->render('profile');
     }
-    
 }

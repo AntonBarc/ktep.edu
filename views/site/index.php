@@ -11,27 +11,27 @@ $this->title = 'Учебный центр КТЭП';
     <main class="content">
         <!-- Статистические карточки -->
         <section class="cards">
-            <div class="card">
+            <a href="<?= Url::to(['materials/index']) ?>" class="card">
                 <img src="<?= Url::to('@web/images/cards/material.png') ?>" alt="Материалы" class="card-image-m">
                 <div>
                     <div class="card-title">15</div>
                     <div class="card-text">материалов</div>
                 </div>
-            </div>
-            <div class="card">
+            </a>
+            <a href="<?= Url::to(['site/users']) ?>" class="card">
                 <img src="<?= Url::to('@web/images/cards/user.png') ?>" alt="Пользователи" class="card-image">
                 <div>
                     <div class="card-title">346</div>
                     <div class="card-text">пользователей</div>
                 </div>
-            </div>
-            <div class="card">
+            </a>
+            <a href="<?= Url::to(['groups/index']) ?>" class="card">
                 <img src="<?= Url::to('@web/images/cards/group.png') ?>" alt="Группы" class="card-image">
                 <div>
                     <div class="card-title">2</div>
                     <div class="card-text">группы</div>
                 </div>
-            </div>
+            </a>
         </section>
 
         <!-- Задачи и материалы -->
