@@ -18,7 +18,7 @@ $this->title = 'Учебный центр КТЭП';
                     <div class="card-text">материалов</div>
                 </div>
             </a>
-            <a href="<?= Url::to(['site/users']) ?>" class="card">
+            <a href="<?= Url::to(['users/index']) ?>" class="card">
                 <img src="<?= Url::to('@web/images/cards/user.png') ?>" alt="Пользователи" class="card-image">
                 <div>
                     <div class="card-title">346</div>

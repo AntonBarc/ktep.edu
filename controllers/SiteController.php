@@ -152,16 +152,16 @@ class SiteController extends Controller
         return $this->render('settings');
     }
 
-    public function actionUsers()
+    /* public function actionUsers()
     {
         // Получаем всех пользователей из базы данных
         $users = User::find()->all();
 
         // Передаем данные в представление
-        return $this->render('users', [
+        return $this->render('index', [
             'users' => $users,
         ]);
-    }
+    } */
 
     public function actionProfile()
     {

@@ -11,7 +11,7 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
      */
     public static function tableName()
     {
-        return 'users'; // Имя таблицы в базе данных
+        return 'users';
     }
 
     /**

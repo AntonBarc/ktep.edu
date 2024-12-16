@@ -51,8 +51,12 @@ $config = [
             'showScriptName' => false,
             'rules' => [
                 'materials' => 'materials/index',
-                'material/create' => 'material/create',
-                'materials/upload' => 'materials/upload',
+                'create' => 'materials/create',
+                'upload' => 'materials/upload',
+                'users' => 'users/index',
+                'groups' => 'users/groups',
+                'roles' => 'users/groups',
+                'reports' => 'reports/index',
             ],
         ],
 

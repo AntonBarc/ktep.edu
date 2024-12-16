@@ -1,6 +1,8 @@
 <?php
 
 use yii\helpers\Html;
+use yii\helpers\Url;
+
 
 /* @var $this yii\web\View */
 /* @var $users app\models\User[] */
@@ -13,10 +15,9 @@ $this->title = 'Список пользователей';
             <aside class="mat-sidebar">
                 <h2>Пользователи</h2>
                 <ul>
-                    <li><a href="#">Все пользователи</a></li>
-                    <li><a href="#">Администраторы</a></li>
-                    <li><a href="#">Преподаватели</a></li>
-                    <li><a href="#">Студенты</a></li>
+                    <li><a href="<?= Url::to(['/users/index']) ?>">Пользователи</a></li>
+                    <li><a href="<?= Url::to(['/users/groups']) ?>">Группы</a></li>
+                    <li><a href="<?= Url::to(['/users/roles']) ?>">Роли</a></li>
                 </ul>
             </aside>
 
@@ -35,14 +36,20 @@ $this->title = 'Список пользователей';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($users as $user): ?>
+                        <?php if (!empty($users)): ?>
+                            <?php foreach ($users as $user): ?>
+                                <tr>
+                                    <td><?= Html::encode($user->id) ?></td>
+                                    <td><?= Html::encode($user->username) ?></td>
+                                    <td><?= Html::encode($user->authKey) ?></td>
+                                    <td><?= Html::encode($user->accessToken) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
                             <tr>
-                                <td><?= Html::encode($user->id) ?></td>
-                                <td><?= Html::encode($user->username) ?></td>
-                                <td><?= Html::encode($user->authKey) ?></td>
-                                <td><?= Html::encode($user->accessToken) ?></td>
+                                <td colspan="4">Нет данных для отображения</td>
                             </tr>
-                        <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </main>
