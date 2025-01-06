@@ -25,7 +25,7 @@ body, html {
     left: 0;
     width: 100%;
     height: 70px;
-    background-color: #366de4;
+    background-color: #012981;
     color: white;
     display: flex;
     align-items: center;
@@ -166,7 +166,7 @@ body, html {
     justify-content: center;
     width: 50px;
     height: 40px;
-    color: #6190f5;
+    color: #0246d8;
     font-size: 24px;
     margin-bottom: 20px;
     text-decoration: none;
@@ -179,7 +179,7 @@ body, html {
 .icon-link.active {
     background-color: #e6e6e6;
     border-radius: 8px;
-    color: #366de4;
+    color: #012981;
     text-decoration: none;
 }
 
@@ -190,7 +190,7 @@ body, html {
     top: 10%;
     bottom: 10%;
     width: 4px;
-    background-color: #366de4;
+    background-color: #012981;
     border-radius: 2px;
 }
 
@@ -306,13 +306,13 @@ a.desc:after {
 
 .card-title {
     font-size: 20px; /* Уменьшение размера заголовка */
-    color: #366de4;
+    color: #012981;
     margin-bottom: 0;
 }
 
 .card-text {
     font-size: 14px; /* Уменьшение размера текста */
-    color: #366de4;
+    color: #012981;
 }
 
 .card-image {
@@ -382,7 +382,7 @@ a.desc:after {
 }
 
 .tabs button.active {
-    border-bottom: 2px solid #366de4;
+    border-bottom: 2px solid #012981;
 }
 
 .material-but button {
@@ -394,7 +394,7 @@ a.desc:after {
 }
 
 .material-but button.active {
-    border-bottom: 2px solid #366de4;
+    border-bottom: 2px solid #012981;
 }
 
 .task-list {
@@ -493,7 +493,7 @@ a.desc:after {
 
 .mat-sidebar ul li a {
     text-decoration: none;
-    color: #007bff;
+    color: #043db9;
     font-weight: 500;
 }
 
@@ -540,7 +540,7 @@ a.desc:after {
 }
 
 .upload-btn {
-    background-color: #007bff;
+    background-color: #012981;
     color: #fff;
     margin-bottom: 15px;
 }
@@ -569,3 +569,25 @@ a.desc:after {
 .content-table tbody tr:hover {
     background-color: #f9f9f9;
 }
+
+.add-project-btn {
+    background-color: transparent; /* Прозрачный фон */
+    color: #9e9e9e;               /* Зеленый цвет текста */
+    border: 2px solid #9e9e9e;    /* Зеленая обводка */
+    border-radius: 50%;           /* Круглая кнопка */
+    width: 20px;                  /* Ширина кнопки */
+    height: 20px;                 /* Высота кнопки */
+    display: flex;                /* Центрируем содержимое */
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;              /* Указатель при наведении */
+    font-size: 20px;              /* Размер шрифта */
+    margin-left: 10px;            /* Отступ от заголовка */
+    transition: all 0.3s ease;    /* Плавный переход на наведение */
+}
+
+.add-project-btn:hover {
+    background-color: #9e9e9e;    /* Зеленый фон при наведении */
+    color: white;                 /* Белый цвет текста при наведении */
+}
+

@@ -13,15 +13,21 @@ $this->title = 'Список материалов';
     <main class="content">
         <div class="mat-container">
             <aside class="mat-sidebar">
-                <h2>Учебные материалы</h2>
+                <header style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>Проекты</h2>
+                    <button class="add-project-btn" title="Добавить проект">
+                        <span>+</span>
+                    </button>
+                </header>
                 <ul>
-                    <li><a href="#">Недавние</a></li>
-                    <li><a href="#">Избранное</a></li>
-                    <li><a href="#">Доступные мне</a></li>
-                    <li><a href="#">Библиотека курсов</a></li>
-                    <li><a href="#">Корзина</a></li>
+                    <li><a href="#">Новый проект 1</a></li>
+                    <li><a href="#">Новый проект 2</a></li>
+                    <li><a href="#">Новый проект 3</a></li>
+                    <li><a href="#">Новый проект 4</a></li>
+                    <li><a href="#">Новый проект 5</a></li>
                 </ul>
             </aside>
+
 
             <main class="mat-main-content">
                 <header style="display: flex; justify-content: space-between; align-items: center;">
