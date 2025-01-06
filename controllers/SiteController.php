@@ -48,6 +48,15 @@ class SiteController extends Controller
         ];
     }
 
+    public function beforeAction($action)
+    {
+        if (!Yii::$app->user->isGuest) {
+            $user = Yii::$app->user->identity;
+            $this->layout = $user->isAdmin() ? 'admin' : 'main';
+        }
+        return parent::beforeAction($action);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -71,7 +80,11 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+        if (!Yii::$app->user->isGuest && Yii::$app->user->identity->isAdmin()) {
+            return $this->render('index_admin'); // Отображаем admin view
+        }
+
+        return $this->render('index'); // Отображаем обычный view
     }
 
     /**
