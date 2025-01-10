@@ -6,27 +6,32 @@ use Yii;
 use yii\web\Controller;
 use yii\web\UploadedFile;
 use app\models\Material;
+use app\models\Project;
 
 class MaterialsController extends Controller
 {
-    public function actionIndex()
+    public function actionIndex($projectId = null)
     {
-        $materials = Material::find()->all(); // Получаем все материалы
-        $model = new Material(); // Создаем новую модель для формы загрузки
+        $projects = Project::find()->all(); // Получаем список проектов
+        $model = new Material(); // Модель для загрузки материалов
+
+        // Если проект выбран, фильтруем материалы по projectId
+        $materials = $projectId
+            ? Material::find()->where(['project_id' => $projectId])->all()
+            : [];
 
         if (Yii::$app->request->isPost) {
             $model->file = UploadedFile::getInstance($model, 'file');
 
             if ($model->file && $model->validate()) {
-                // Генерация пути и названия материала
                 $filePath = 'uploads/' . $model->file->baseName . '.' . $model->file->extension;
-                $model->title = $model->file->baseName; // Название = имя файла (без расширения)
+                $model->title = $model->file->baseName; // Название файла
+                $model->file_path = $filePath;
+                $model->project_id = $projectId; // Связь с проектом
+                $model->created_at = date('Y-m-d H:i:s');
+                $model->author_id = Yii::$app->user->id; // Автор (если авторизация используется)
 
-                if ($model->file->saveAs($filePath)) {
-                    $model->file_path = $filePath;
-                    $model->created_at = date('Y-m-d H:i:s');
-                    $model->author_id = Yii::$app->user->id; // Установите автора, если используется авторизация
-                    $model->save(false);
+                if ($model->file->saveAs($filePath) && $model->save(false)) {
                     Yii::$app->session->setFlash('success', 'Файл успешно загружен.');
                 } else {
                     Yii::$app->session->setFlash('error', 'Ошибка при сохранении файла.');
@@ -35,17 +40,29 @@ class MaterialsController extends Controller
                 Yii::$app->session->setFlash('error', 'Ошибка валидации файла.');
             }
 
-            return $this->redirect(['index']); // Обновляем страницу после загрузки
+            return $this->redirect(['index', 'projectId' => $projectId]); // Обновляем страницу
         }
 
         return $this->render('index', [
+            'projects' => $projects,
+            'projectId' => $projectId,
             'materials' => $materials,
             'model' => $model,
+            'currentProject' => $projectId ? Project::findOne($projectId) : null,
         ]);
     }
 
+    public function actionCreateProject()
+    {
+        $project = new Project();
 
+        if ($project->load(Yii::$app->request->post()) && $project->save()) {
+            Yii::$app->session->setFlash('success', 'Проект успешно создан.');
+            return $this->redirect(['index']);
+        }
 
+        return $this->render('create-project', ['model' => $project]);
+    }
 
     public function actionCreate()
     {

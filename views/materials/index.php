@@ -15,32 +15,43 @@ $this->title = 'Список материалов';
             <aside class="mat-sidebar">
                 <header style="display: flex; justify-content: space-between; align-items: center;">
                     <h2>Проекты</h2>
-                    <button class="add-project-btn" title="Добавить проект">
-                        <span>+</span>
-                    </button>
+                    <button class="add-project-btn" title="Добавить проект" onclick="showCreateProjectModal()">+</button>
                 </header>
                 <ul>
-                    <li><a href="#">Новый проект 1</a></li>
-                    <li><a href="#">Новый проект 2</a></li>
-                    <li><a href="#">Новый проект 3</a></li>
-                    <li><a href="#">Новый проект 4</a></li>
-                    <li><a href="#">Новый проект 5</a></li>
+                    <?php foreach ($projects as $project): ?>
+                        <li>
+                            <a href="<?= Yii::$app->urlManager->createUrl(['materials/index', 'projectId' => $project->id]) ?>"
+                                class="<?= $projectId == $project->id ? 'active' : '' ?>">
+                                <?= Html::encode($project->title) ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
                 </ul>
             </aside>
 
-
             <main class="mat-main-content">
                 <header style="display: flex; justify-content: space-between; align-items: center;">
-                    <h1>Новый проект (Антон Барчей)</h1>
+
+                    <?php
+                    $currentProject = null;
+                    foreach ($projects as $project) {
+                        if ($project->id == $projectId) {
+                            $currentProject = $project;
+                            break;
+                        }
+                    }
+                    ?>
+                    <h1><?= Html::encode($currentProject ? $currentProject->title : 'Выберите проект') ?></h1>
                     <div class="button-container">
                         <button class="create-btn">Создать</button>
                         <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
                         <?= $form->field($model, 'file', [
-                            'template' => '{input}{error}', // Убираем метку и оставляем только поле
+                            'template' => '{input}{error}',
                         ])->fileInput([
-                            'style' => 'display: none;', // Скрываем стандартный элемент "Обзор"
+                            'style' => 'display: none;',
                             'id' => 'fileInput',
                         ]) ?>
+                        <?= Html::activeHiddenInput($model, 'project_id', ['value' => $projectId]) ?>
                         <button class="upload-btn" type="button" id="uploadBtn">Загрузить</button>
                         <?php ActiveForm::end(); ?>
                     </div>
@@ -66,17 +77,81 @@ $this->title = 'Список материалов';
                 </table>
             </main>
         </div>
-    </main>
-</div>
 
-<script>
-    // Обработчик кнопки загрузки
-    document.getElementById('uploadBtn').addEventListener('click', function() {
-        document.getElementById('fileInput').click(); // Открываем проводник для выбора файла
-    });
+        <!-- Модальное окно -->
+        <div id="createProjectModal" class="modal">
+            <div class="modal-content">
+                <header class="modal-header">
+                    <h2>Управление проектом</h2>
+                    <span class="close-btn">&times;</span>
+                </header>
 
-    // Отправка формы автоматически при выборе файла
-    document.getElementById('fileInput').addEventListener('change', function() {
-        this.form.submit(); // Отправляем форму после выбора файла
-    });
-</script>
+                <div class="modal-body">
+                    <!-- Поле для ввода названия проекта -->
+                    <label for="projectTitle">Название проекта</label>
+                    <input type="text" id="projectTitle" name="projectTitle" placeholder="Новый проект (<?= Html::encode(Yii::$app->user->identity->username
+                    ) ?>)">
+
+                    <!-- Участники проекта -->
+                    <div class="project-participants">
+                        <span>Участники проекта</span>
+                        <button class="add-participant-btn">
+                            <span class="icon">+</span>
+                            <span>Добавление участников</span>
+                        </button>
+                    </div>
+
+                    <hr class="separator">
+
+                    <!-- Список участников -->
+                    <div class="participants-list">
+                        <div class="participant">
+                            <span class="participant-name"><?= Html::encode(Yii::$app->user->identity->username) ?></span>
+                            <span class="participant-role">Владелец проекта</span>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="modal-footer">
+                    <button class="delete-project-btn">Удалить проект</button>
+                    <button class="done-btn">Готово</button>
+                </footer>
+            </div>
+        </div>
+
+
+        <script>
+            // Обработчик кнопки загрузки
+            document.getElementById('uploadBtn').addEventListener('click', function() {
+                document.getElementById('fileInput').click(); // Открываем проводник для выбора файла
+            });
+
+            // Отправка формы автоматически при выборе файла
+            document.getElementById('fileInput').addEventListener('change', function() {
+                this.form.submit(); // Отправляем форму после выбора файла
+            });
+        </script>
+
+        <script>
+            // Открытие модального окна
+            document.querySelector('.add-project-btn').addEventListener('click', function() {
+                document.getElementById('createProjectModal').style.display = 'block';
+            });
+
+            // Закрытие модального окна
+            document.querySelector('.close-btn').addEventListener('click', function() {
+                document.getElementById('createProjectModal').style.display = 'none';
+            });
+
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('createProjectModal');
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            // Добавление участников (заглушка)
+            document.querySelector('.add-participant-btn').addEventListener('click', function() {
+                alert('Добавление участников пока не реализовано.');
+            });
+        </script>
