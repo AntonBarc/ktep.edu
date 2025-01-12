@@ -52,6 +52,31 @@ class MaterialsController extends Controller
         ]);
     }
 
+    public function actionManageProject()
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        $postData = Yii::$app->request->post('Project');
+        $projectId = $postData['id'] ?? null;
+
+        $project = $projectId ? Project::findOne($projectId) : new Project();
+
+        if (!$project) {
+            return ['success' => false, 'message' => 'Проект не найден.'];
+        }
+
+        $project->title = $postData['title'];
+
+        if ($project->save()) {
+            return ['success' => true, 'projectId' => $project->id];
+        }
+
+        return ['success' => false, 'message' => 'Ошибка при сохранении проекта.'];
+    }
+
+
+
+
     public function actionCreateProject()
     {
         $project = new Project();
@@ -63,6 +88,21 @@ class MaterialsController extends Controller
 
         return $this->render('create-project', ['model' => $project]);
     }
+
+    public function actionDeleteProject()
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        $projectId = Yii::$app->request->post('id');
+        $project = Project::findOne($projectId);
+
+        if ($project && $project->delete()) {
+            return ['success' => true];
+        }
+
+        return ['success' => false];
+    }
+
 
     public function actionCreate()
     {

@@ -57,6 +57,7 @@ $config = [
                 'groups' => 'users/groups',
                 'roles' => 'users/groups',
                 'reports' => 'reports/index',
+                'materials/manage-project' => 'materials/manage-project',
             ],
         ],
 
