@@ -562,8 +562,8 @@ a.desc:after {
 .button-container {
     display: flex;
     gap: 10px; /* Расстояние между кнопками */
-    margin-top: 20px; /* Отступ от нижнего элемента */
     align-items: center; /* Выравнивание по вертикали */
+    margin-bottom: 20px;
 }
 
 .upload-btn, .create-btn {
@@ -578,19 +578,18 @@ a.desc:after {
     align-items: center;
     justify-content: center;
     box-sizing: border-box; /* Учитываем padding в ширине */
+    margin: 0; /* Убираем все внешние отступы */
 }
 
 .upload-btn {
     background-color: #012981;
     color: #fff;
-    margin-bottom: 15px;
 }
 
 .create-btn {
     background-color: #28a745;
     color: #fff;
 }
-
 .content-table {
     width: 100%;
     border-collapse: collapse;

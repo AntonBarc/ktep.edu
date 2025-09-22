@@ -6,6 +6,8 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $materials app\models\Material[] */
 /* @var $model app\models\Material */
+/* @var $projects app\models\Project[] */
+/* @var $projectId int */
 
 $this->title = 'Список материалов';
 ?>
@@ -33,7 +35,6 @@ $this->title = 'Список материалов';
                                         title="Опции">
                                         <i class="bi bi-three-dots"></i>
                                     </button>
-
                                 </div>
                             </div>
                         </li>
@@ -41,54 +42,79 @@ $this->title = 'Список материалов';
                 </ul>
             </aside>
 
-
-
             <main class="mat-main-content">
                 <header style="display: flex; justify-content: space-between; align-items: center;">
 
                     <?php
                     $currentProject = null;
-                    foreach ($projects as $project) {
-                        if ($project->id == $projectId) {
-                            $currentProject = $project;
-                            break;
+                    if ($projectId) {
+                        foreach ($projects as $project) {
+                            if ($project->id == $projectId) {
+                                $currentProject = $project;
+                                break;
+                            }
                         }
                     }
                     ?>
+
                     <h1><?= Html::encode($currentProject ? $currentProject->title : 'Выберите проект') ?></h1>
+
                     <div class="button-container">
-                        <button class="create-btn">Создать</button>
-                        <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
-                        <?= $form->field($model, 'file', [
-                            'template' => '{input}{error}',
-                        ])->fileInput([
-                            'style' => 'display: none;',
-                            'id' => 'fileInput',
-                        ]) ?>
-                        <?= Html::activeHiddenInput($model, 'project_id', ['value' => $projectId]) ?>
-                        <button class="upload-btn" type="button" id="uploadBtn">Загрузить</button>
-                        <?php ActiveForm::end(); ?>
+                        <?php if ($currentProject): ?>
+                            <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
+                            <?= $form->field($model, 'file', [
+                                'template' => '{input}{error}',
+                            ])->fileInput([
+                                'style' => 'display: none;',
+                                'id' => 'fileInput',
+                            ]) ?>
+                            <?= Html::activeHiddenInput($model, 'project_id', ['value' => $projectId]) ?>
+                            <button class="create-btn" type="button" id="createBtn">Cоздать</button>
+                            <?php ActiveForm::end(); ?>
+                        <?php else: ?>
+                            <button class="create-btn" type="button" disabled title="Сначала выберите проект">Загрузить</button>
+                        <?php endif; ?>
+                        <?php if ($currentProject): ?>
+                            <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
+                            <?= $form->field($model, 'file', [
+                                'template' => '{input}{error}',
+                            ])->fileInput([
+                                'style' => 'display: none;',
+                                'id' => 'fileInput',
+                            ]) ?>
+                            <?= Html::activeHiddenInput($model, 'project_id', ['value' => $projectId]) ?>
+                            <button class="upload-btn" type="button" id="uploadBtn">Загрузить</button>
+                            <?php ActiveForm::end(); ?>
+                        <?php else: ?>
+                            <button class="upload-btn" type="button" disabled title="Сначала выберите проект">Загрузить</button>
+                        <?php endif; ?>
                     </div>
                 </header>
 
-                <table class="content-table">
-                    <thead>
-                        <tr>
-                            <th>Название</th>
-                            <th>Файл</th>
-                            <th>Дата добавления</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($materials as $material): ?>
+                <?php if ($currentProject): ?>
+                    <table class="content-table">
+                        <thead>
                             <tr>
-                                <td><?= Html::encode($material->title) ?></td>
-                                <td><a href="<?= Yii::getAlias('@web/' . $material->file_path) ?>" download>Скачать</a></td>
-                                <td><?= date('d.m.Y', strtotime($material->created_at)) ?></td>
+                                <th>Название</th>
+                                <th>Файл</th>
+                                <th>Дата добавления</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($materials as $material): ?>
+                                <tr>
+                                    <td><?= Html::encode($material->title) ?></td>
+                                    <td><a href="<?= Yii::getAlias('@web/' . $material->file_path) ?>" download>Скачать</a></td>
+                                    <td><?= date('d.m.Y', strtotime($material->created_at)) ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <div class="no-project-selected">
+                        <p>Пожалуйста, выберите проект из списка слева чтобы просмотреть материалы.</p>
+                    </div>
+                <?php endif; ?>
             </main>
         </div>
 
@@ -102,7 +128,7 @@ $this->title = 'Список материалов';
 
                 <div class="modal-body">
                     <?php $form = \yii\widgets\ActiveForm::begin([
-                        'action' => ['materials/manage-project'], // Экшен для создания/обновления проекта
+                        'action' => ['materials/manage-project'],
                         'id' => 'manageProjectForm',
                         'options' => ['enctype' => 'multipart/form-data']
                     ]); ?>
@@ -143,13 +169,13 @@ $this->title = 'Список материалов';
 
         <script>
             // Обработчик кнопки загрузки
-            document.getElementById('uploadBtn').addEventListener('click', function() {
-                document.getElementById('fileInput').click(); // Открываем проводник для выбора файла
+            document.getElementById('uploadBtn')?.addEventListener('click', function() {
+                document.getElementById('fileInput').click();
             });
 
             // Отправка формы автоматически при выборе файла
-            document.getElementById('fileInput').addEventListener('change', function() {
-                this.form.submit(); // Отправляем форму после выбора файла
+            document.getElementById('fileInput')?.addEventListener('change', function() {
+                this.form.submit();
             });
         </script>
 
@@ -167,9 +193,7 @@ $this->title = 'Список материалов';
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                // Перенаправляем на страницу созданного проекта
                                 document.getElementById('createProjectModal').style.display = 'none';
-                                // Перенаправляем на страницу проекта
                                 window.location.href = '<?= \yii\helpers\Url::to(['materials/index']) ?>?projectId=' + data.projectId;
                             } else {
                                 alert('Ошибка: ' + data.message);
@@ -181,7 +205,6 @@ $this->title = 'Список материалов';
                         });
                 });
 
-
                 // Кнопка "Удалить проект"
                 document.getElementById('deleteProjectBtn').addEventListener('click', function() {
                     const projectId = document.getElementById('projectIdInput').value;
@@ -192,7 +215,6 @@ $this->title = 'Список материалов';
                     }
 
                     if (confirm('Вы уверены, что хотите удалить проект?')) {
-                        // AJAX-запрос для удаления проекта
                         fetch('<?= \yii\helpers\Url::to(['materials/delete-project']) ?>', {
                                 method: 'POST',
                                 headers: {
@@ -207,7 +229,7 @@ $this->title = 'Список материалов';
                             .then(data => {
                                 if (data.success) {
                                     alert('Проект успешно удален!');
-                                    window.location.reload(); // Перезагружаем страницу
+                                    window.location.href = '<?= \yii\helpers\Url::to(['materials/index']) ?>';
                                 } else {
                                     alert('Не удалось удалить проект. Попробуйте снова.');
                                 }
@@ -224,14 +246,14 @@ $this->title = 'Список материалов';
                     document.getElementById('createProjectModal').style.display = 'none';
                 });
 
-                // Открытие модального окна
+                // Открытие модального окна для создания нового проекта
                 document.querySelector('.add-project-btn').addEventListener('click', function() {
                     document.getElementById('createProjectModal').style.display = 'block';
-                    document.getElementById('projectIdInput').value = ''; // Сбрасываем ID проекта
-                    document.getElementById('projectTitle').value = ''; // Сбрасываем название проекта
+                    document.getElementById('projectIdInput').value = '';
+                    document.getElementById('projectTitle').value = '';
+                    document.getElementById('deleteProjectBtn').style.display = 'none';
                 });
             });
-
 
             // Добавление участников (заглушка)
             document.querySelector('.add-participant-btn').addEventListener('click', function() {
@@ -245,6 +267,7 @@ $this->title = 'Список материалов';
                 const modal = document.getElementById('createProjectModal');
                 const projectIdInput = document.getElementById('projectIdInput');
                 const projectTitleInput = document.getElementById('projectTitle');
+                const deleteProjectBtn = document.getElementById('deleteProjectBtn');
 
                 // Обработчик кнопок с троеточием
                 projectOptionsButtons.forEach(button => {
@@ -252,11 +275,10 @@ $this->title = 'Список материалов';
                         const projectId = this.getAttribute('data-project-id');
                         const projectTitle = this.getAttribute('data-project-title');
 
-                        // Заполнение полей модального окна
                         projectIdInput.value = projectId;
                         projectTitleInput.value = projectTitle;
+                        deleteProjectBtn.style.display = 'block';
 
-                        // Открытие модального окна
                         modal.style.display = 'block';
                     });
                 });
