@@ -208,30 +208,29 @@ $this->title = 'Список материалов';
                 // Кнопка "Удалить проект"
                 document.getElementById('deleteProjectBtn').addEventListener('click', function() {
                     const projectId = document.getElementById('projectIdInput').value;
+                    const projectTitle = document.getElementById('projectTitle').value;
 
                     if (!projectId) {
                         alert('Невозможно удалить проект: проект не выбран.');
                         return;
                     }
 
-                    if (confirm('Вы уверены, что хотите удалить проект?')) {
+                    if (confirm('Вы уверены, что хотите удалить проект "' + projectTitle + '" и ВСЕ материалы в нем? Это действие нельзя отменить.')) {
                         fetch('<?= \yii\helpers\Url::to(['materials/delete-project']) ?>', {
                                 method: 'POST',
                                 headers: {
-                                    'Content-Type': 'application/json',
+                                    'Content-Type': 'application/x-www-form-urlencoded',
                                     'X-CSRF-Token': '<?= Yii::$app->request->csrfToken ?>'
                                 },
-                                body: JSON.stringify({
-                                    id: projectId
-                                })
+                                body: 'id=' + projectId
                             })
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
-                                    alert('Проект успешно удален!');
+                                    alert('Проект и все материалы успешно удалены!');
                                     window.location.href = '<?= \yii\helpers\Url::to(['materials/index']) ?>';
                                 } else {
-                                    alert('Не удалось удалить проект. Попробуйте снова.');
+                                    alert('Ошибка: ' + data.message);
                                 }
                             })
                             .catch(error => {
