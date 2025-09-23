@@ -3,19 +3,80 @@
 namespace app\models;
 
 use yii\db\ActiveRecord;
+use yii\web\IdentityInterface;
+use Yii;
 
-class User extends ActiveRecord implements \yii\web\IdentityInterface
+class User extends ActiveRecord implements IdentityInterface
 {
-    public function isAdmin()
-    {
-        return $this->role === 'admin';
-    }
+    const ROLE_USER = 'user';
+    const ROLE_ADMIN = 'admin';
+
     /**
      * {@inheritdoc}
      */
     public static function tableName()
     {
         return 'users';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rules()
+    {
+        return [
+            [['username', 'password', 'role'], 'required', 'on' => 'create'],
+            [['username', 'password', 'authKey', 'accessToken', 'role'], 'string', 'max' => 255],
+            [['username'], 'unique'],
+            [['password'], 'string', 'min' => 6, 'on' => 'create'],
+            [['role'], 'in', 'range' => [self::ROLE_USER, self::ROLE_ADMIN]],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => 'ID',
+            'username' => 'Логин',
+            'password' => 'Пароль',
+            'authKey' => 'Auth Key',
+            'accessToken' => 'Access Token',
+            'role' => 'Роль',
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeSave($insert)
+    {
+        if (parent::beforeSave($insert)) {
+            if ($this->isNewRecord) {
+                // Генерируем authKey и accessToken для новых пользователей
+                $this->authKey = Yii::$app->security->generateRandomString();
+                $this->accessToken = Yii::$app->security->generateRandomString();
+                
+                // Хешируем пароль только если он был изменен
+                if ($this->password && !empty($this->password)) {
+                    $this->password = Yii::$app->security->generatePasswordHash($this->password);
+                }
+            } else {
+                // При обновлении хешируем пароль только если он был изменен
+                if ($this->isAttributeChanged('password') && !empty($this->password)) {
+                    $this->password = Yii::$app->security->generatePasswordHash($this->password);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
     }
 
     /**
@@ -77,6 +138,17 @@ class User extends ActiveRecord implements \yii\web\IdentityInterface
      */
     public function validatePassword($password)
     {
-        return $this->password === $password;
+        return Yii::$app->security->validatePassword($password, $this->password);
+    }
+
+    /**
+     * Получить список ролей для dropdown
+     */
+    public static function getRolesList()
+    {
+        return [
+            self::ROLE_USER => 'User',
+            self::ROLE_ADMIN => 'Admin'
+        ];
     }
 }
