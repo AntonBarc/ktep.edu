@@ -3,44 +3,54 @@
 namespace app\controllers;
 
 use Yii;
-use yii\web\Controller;
-use yii\web\UploadedFile;
 use app\models\Material;
 use app\models\Project;
+use app\models\ProjectUser;
+use app\models\User;
+use yii\web\Controller;
+use yii\web\UploadedFile;
 
 class MaterialsController extends Controller
 {
     public function actionIndex($projectId = null)
     {
-        $projects = Project::find()->all(); // Получаем список проектов
-        $model = new Material(); // Модель для загрузки материалов
-
-        // Если проект выбран, фильтруем материалы по projectId
-        $materials = $projectId
-            ? Material::find()->where(['project_id' => $projectId])->all()
-            : [];
+        $isAdmin = Yii::$app->user->identity->isAdmin();
+        
+        // Получаем проекты в зависимости от прав пользователя
+        $projects = Project::getAccessibleProjects(Yii::$app->user->id, $isAdmin);
+        
+        $materials = [];
+        $model = new Material();
+        
+        if ($projectId) {
+            $project = Project::findOne($projectId);
+            if ($project && ($isAdmin || $project->isUserParticipant(Yii::$app->user->id))) {
+                $materials = Material::find()->where(['project_id' => $projectId])->all();
+            }
+        }
 
         if (Yii::$app->request->isPost) {
+            $model->load(Yii::$app->request->post());
             $model->file = UploadedFile::getInstance($model, 'file');
-
-            if ($model->file && $model->validate()) {
-                $filePath = 'uploads/' . $model->file->baseName . '.' . $model->file->extension;
-                $model->title = $model->file->baseName; // Название файла
-                $model->file_path = $filePath;
-                $model->project_id = $projectId; // Связь с проектом
-                $model->created_at = date('Y-m-d H:i:s');
-                $model->author_id = Yii::$app->user->id; // Автор (если авторизация используется)
-
-                if ($model->file->saveAs($filePath) && $model->save(false)) {
-                    Yii::$app->session->setFlash('success', 'Файл успешно загружен.');
-                } else {
-                    Yii::$app->session->setFlash('error', 'Ошибка при сохранении файла.');
+            
+            if ($model->validate() && $model->file) {
+                $uploadPath = Yii::getAlias('@webroot/uploads/');
+                if (!is_dir($uploadPath)) {
+                    mkdir($uploadPath, 0777, true);
                 }
-            } else {
-                Yii::$app->session->setFlash('error', 'Ошибка валидации файла.');
+                
+                $fileName = time() . '_' . $model->file->baseName . '.' . $model->file->extension;
+                $filePath = 'uploads/' . $fileName;
+                
+                if ($model->file->saveAs($uploadPath . $fileName)) {
+                    $model->file_path = $filePath;
+                    $model->title = $model->file->baseName;
+                    
+                    if ($model->save(false)) {
+                        return $this->redirect(['index', 'projectId' => $projectId]);
+                    }
+                }
             }
-
-            return $this->redirect(['index', 'projectId' => $projectId]); // Обновляем страницу
         }
 
         return $this->render('index', [
@@ -48,68 +58,119 @@ class MaterialsController extends Controller
             'projectId' => $projectId,
             'materials' => $materials,
             'model' => $model,
-            'currentProject' => $projectId ? Project::findOne($projectId) : null,
         ]);
     }
 
-    public function actionManageProject()
-    {
-        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
-        $postData = Yii::$app->request->post('Project');
-        $projectId = $postData['id'] ?? null;
-
-        $project = $projectId ? Project::findOne($projectId) : new Project();
-
-        if (!$project) {
-            return ['success' => false, 'message' => 'Проект не найден.'];
+    /**
+     * Управление проектом (создание/редактирование)
+     */
+public function actionManageProject()
+{
+    Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+    
+    $projectId = Yii::$app->request->post('Project')['id'] ?? null;
+    $title = Yii::$app->request->post('Project')['title'] ?? ''; // Используем title
+    $participants = Yii::$app->request->post('participants') ?? '';
+    
+    Yii::info('Начало сохранения проекта: ' . $title, 'project');
+    
+    try {
+        if ($projectId) {
+            $project = Project::findOne($projectId);
+            if (!$project) {
+                return ['success' => false, 'message' => 'Проект не найден'];
+            }
+        } else {
+            $project = new Project();
         }
-
-        $project->title = $postData['title'];
-
+        
+        // Используем правильное имя поля
+        $project->title = $title; // или $project->name = $title; в зависимости от структуры
+        
         if ($project->save()) {
+            // Обрабатываем участников
+            $participantIds = array_filter(explode(',', $participants));
+            
+            // Удаляем старых участников (кроме владельца) только при редактировании
+            if ($projectId) {
+                ProjectUser::deleteAll([
+                    'and',
+                    ['project_id' => $project->id],
+                    ['!=', 'user_id', Yii::$app->user->id]
+                ]);
+            }
+            
+            // Добавляем новых участников
+            foreach ($participantIds as $userId) {
+                if ($userId != Yii::$app->user->id && !empty($userId)) {
+                    $project->addUser($userId, ProjectUser::ROLE_PARTICIPANT);
+                }
+            }
+            
+            // Добавляем владельца, если его нет
+            if (!$project->isUserParticipant(Yii::$app->user->id)) {
+                $project->addUser(Yii::$app->user->id, ProjectUser::ROLE_OWNER);
+            }
+            
             return ['success' => true, 'projectId' => $project->id];
+            
+        } else {
+            $errorMessage = 'Ошибка сохранения проекта';
+            if ($project->hasErrors()) {
+                $errors = $project->getFirstErrors();
+                $errorMessage = implode(', ', $errors);
+            }
+            return ['success' => false, 'message' => $errorMessage];
         }
-
-        return ['success' => false, 'message' => 'Ошибка при сохранении проекта.'];
+    } catch (\Exception $e) {
+        Yii::error('Ошибка при сохранении проекта: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Ошибка при сохранении проекта: ' . $e->getMessage()];
     }
+}
 
-
-
-
-    public function actionCreateProject()
-    {
-        $project = new Project();
-
-        if ($project->load(Yii::$app->request->post()) && $project->save()) {
-            Yii::$app->session->setFlash('success', 'Проект успешно создан.');
-            return $this->redirect(['index']);
-        }
-
-        return $this->render('create-project', ['model' => $project]);
-    }
-
+    /**
+     * Удаление проекта
+     */
     public function actionDeleteProject()
     {
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-
+        
         $projectId = Yii::$app->request->post('id');
+        
+        if (!$projectId) {
+            return ['success' => false, 'message' => 'ID проекта не указан'];
+        }
+        
         $project = Project::findOne($projectId);
-
-        if ($project && $project->delete()) {
-            return ['success' => true];
+        
+        if (!$project) {
+            return ['success' => false, 'message' => 'Проект не найден'];
         }
-
-        return ['success' => false];
-    }
-
-
-    public function actionCreate()
-    {
-        $model = new Material();  // Создание новой модели
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            // Логика сохранения материала
+        
+        $transaction = Yii::$app->db->beginTransaction();
+        
+        try {
+            // Удаляем файлы материалов
+            foreach ($project->materials as $material) {
+                $filePath = Yii::getAlias('@webroot') . '/' . $material->file_path;
+                if (file_exists($filePath) && is_file($filePath)) {
+                    unlink($filePath);
+                }
+            }
+            
+            // Удаляем проект (материалы и участники удалятся каскадно)
+            if ($project->delete() === false) {
+                throw new \Exception('Ошибка при удалении проекта из базы данных');
+            }
+            
+            $transaction->commit();
+            
+            return ['success' => true, 'message' => 'Проект успешно удален'];
+            
+        } catch (\Exception $e) {
+            $transaction->rollBack();
+            Yii::error('Ошибка удаления проекта: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Ошибка при удалении: ' . $e->getMessage()];
         }
-        return $this->render('create', ['model' => $model]);  // Передача модели в представление
     }
 }

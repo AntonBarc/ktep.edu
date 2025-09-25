@@ -58,6 +58,11 @@ $config = [
                 'roles' => 'users/groups',
                 'reports' => 'reports/index',
                 'materials/manage-project' => 'materials/manage-project',
+                'user-project/get-users' => 'user-project/get-users',
+            'user-project/get-project-participants' => 'user-project/get-project-participants',
+            'user-project/add-user' => 'user-project/add-user',
+            'user-project/remove-user' => 'user-project/remove-user',
+            'user-project/get-user-projects' => 'user-project/get-user-projects',
             ],
         ],
 
