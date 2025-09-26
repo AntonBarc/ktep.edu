@@ -59,7 +59,7 @@ AppAsset::register($this);
                     <i class="fas fa-home"></i>
                     <span class="tooltip">Главная</span>
                 </a>
-                <a href="<?= Url::to(['/materials/index']) ?>" class="icon-link">
+                <a href="<?= Url::to(['/materials/index?projectId=1']) ?>" class="icon-link">
                     <i class="fas fa-file-alt"></i>
                     <span class="tooltip">Учебные материалы</span>
                 </a>

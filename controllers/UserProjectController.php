@@ -55,7 +55,7 @@ class UserProjectController extends Controller
         \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
         // Получаем все записи из user_project для данного проекта
-        $userProjectRecords = \app\models\UserProject::find()
+        $userProjectRecords = \app\models\ProjectUser::find()
             ->where(['project_id' => $projectId])
             ->with('user') // жадная загрузка, чтобы избежать N+1
             ->all();

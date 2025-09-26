@@ -835,3 +835,49 @@ a.desc:after {
     transform: translateY(-1px);
 }
 
+/* Контейнер строки — без padding-right */
+.project-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+/* Название проекта — по умолчанию без отступа справа */
+.project-title {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    padding-right: 0; /* ← по умолчанию 0 */
+    transition: padding-right 0.2s ease; /* плавное изменение */
+}
+
+/* Кнопка — абсолютно позиционирована */
+.project-options-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    visibility: hidden;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* При наведении на строку — добавляем отступ и показываем кнопку */
+.project-row:hover .project-title {
+    padding-right: 24px; /* ← отступ под кнопку */
+}
+
+.project-row:hover .project-options-btn {
+    opacity: 1;
+    visibility: visible;
+}
