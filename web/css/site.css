@@ -881,3 +881,21 @@ a.desc:after {
     opacity: 1;
     visibility: visible;
 }
+
+.project-participants-avatars {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.avatar-wrapper {
+    cursor: pointer;
+}
+
+.participant-avatar,
+.avatar-initials {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+}

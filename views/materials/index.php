@@ -43,29 +43,68 @@ $this->title = 'Список материалов';
             </aside>
 
             <main class="mat-main-content">
-                <header style="display: flex; justify-content: space-between; align-items: center;">
 
-                    <?php
-                    $currentProject = null;
-                    if ($projectId) {
-                        foreach ($projects as $project) {
-                            if ($project->id == $projectId) {
-                                $currentProject = $project;
-                                break;
-                            }
+
+                <?php
+                $currentProject = null;
+                if ($projectId) {
+                    foreach ($projects as $project) {
+                        if ($project->id == $projectId) {
+                            $currentProject = $project;
+                            break;
                         }
                     }
-                    ?>
+                }
+                ?>
 
-                    <h1><?= Html::encode($currentProject ? $currentProject->title : 'Выберите проект') ?></h1>
+                <header style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                    <div>
+                        <h1><?= Html::encode($currentProject ? $currentProject->title : 'Выберите проект') ?></h1>
 
-                    <div class="button-container">
+                        <?php if ($currentProject && !empty($projectParticipants)): ?>
+                            <div class="project-participants-avatars"
+                                style="margin-top: 8px; margin-bottom: 8px; in display: flex; gap: 8px; flex-wrap: wrap;">
+                                <?php foreach ($projectParticipants as $item): ?>
+                                    <?php if ($item->user): ?>
+                                        <?php
+                                        $name = $item->user->username;
+                                        $initials = mb_substr($name, 0, 1, 'UTF-8');
+                                        ?>
+                                        <div class="avatar-wrapper" title="<?= Html::encode($name) ?>">
+                                            <?php if (!empty($item->user->avatar)): ?>
+                                                <img src="<?= Yii::getAlias('@web') . '/' . $item->user->avatar ?>"
+                                                    alt="<?= Html::encode($name) ?>" class="participant-avatar"
+                                                    style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
+                                            <?php else: ?>
+                                                <div class="avatar-initials" style="
+                                    width: 32px; 
+                                    height: 32px; 
+                                    border-radius: 50%; 
+                                    background: #007bff; 
+                                    color: white; 
+                                    display: flex; 
+                                    align-items: center; 
+                                    justify-content: center; 
+                                    font-weight: bold;
+                                    border: 2px solid #ddd;
+                                ">
+                                                    <?= Html::encode(strtoupper($initials)) ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="button-container" style="flex-shrink: 0;">
                         <?php if ($currentProject): ?>
                             <!-- Форма для "Создать" -->
                             <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
                             <?= $form->field($model, 'file', ['template' => '{input}{error}'])->fileInput([
                                 'style' => 'display: none;',
-                                'id' => 'fileInputCreate', // ← уникальный ID
+                                'id' => 'fileInputCreate',
                             ]) ?>
                             <?= Html::activeHiddenInput($model, 'project_id', ['value' => $projectId]) ?>
                             <button class="create-btn" type="button" id="createBtn">Создать</button>
@@ -80,7 +119,7 @@ $this->title = 'Список материалов';
                             <?php $form = ActiveForm::begin(['options' => ['enctype' => 'multipart/form-data']]); ?>
                             <?= $form->field($model, 'file', ['template' => '{input}{error}'])->fileInput([
                                 'style' => 'display: none;',
-                                'id' => 'fileInputUpload', // ← уникальный ID
+                                'id' => 'fileInputUpload',
                             ]) ?>
                             <?= Html::activeHiddenInput($model, 'project_id', ['value' => $projectId]) ?>
                             <button class="upload-btn" type="button" id="uploadBtn">Загрузить</button>

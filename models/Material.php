@@ -20,6 +20,7 @@ class Material extends ActiveRecord
     public function rules()
     {
         return [
+            [['project_id'], 'integer'],
             [['file'], 'file', 'extensions' => 'doc, docx, pdf', 'maxSize' => 10 * 1024 * 1024],
             [['title'], 'string'], // Название файла автоматически задается
         ];
