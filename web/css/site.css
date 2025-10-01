@@ -631,27 +631,61 @@ a.desc:after {
     color: white;                 /* Белый цвет текста при наведении */
 }
 
-/* Общий стиль для модального окна */
+/* === Анимация модальных окон с затемнением === */
 .modal {
     display: none;
     position: fixed;
-    z-index: 1000;
-    left: 0;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
 }
 
+.modal.active {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; /* начальное положение — внизу */
+}
+
+.modal.active.animate {
+    align-items: center; /* конечное положение — по центру */
+}
+
+/* Затемнение фона */
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0);
+    transition: background 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.modal.active .modal-backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+}
+
+/* Содержимое окна */
 .modal-content {
-    background-color: #fff;
-    margin: 10% auto;
-    padding: 0;
-    width: 60%;
-    border-radius: 10px;
     position: relative;
+    background: #fff;
+    width: 60%;
+    max-width: 600px;
+    border-radius: 10px;
     overflow: hidden;
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    margin: 0 20px;
+    z-index: 2;
+}
+
+.modal.active.animate .modal-content {
+    transform: translateY(0);
 }
 
 /* Шапка */

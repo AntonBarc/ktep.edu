@@ -62,38 +62,53 @@ $this->title = 'Список материалов';
                         <h1><?= Html::encode($currentProject ? $currentProject->title : 'Выберите проект') ?></h1>
 
                         <?php if ($currentProject && !empty($projectParticipants)): ?>
-                            <div class="project-participants-avatars"
-                                style="margin-top: 8px; margin-bottom: 8px; in display: flex; gap: 8px; flex-wrap: wrap;">
-                                <?php foreach ($projectParticipants as $item): ?>
-                                    <?php if ($item->user): ?>
-                                        <?php
-                                        $name = $item->user->username;
-                                        $initials = mb_substr($name, 0, 1, 'UTF-8');
-                                        ?>
-                                        <div class="avatar-wrapper" title="<?= Html::encode($name) ?>">
-                                            <?php if (!empty($item->user->avatar)): ?>
-                                                <img src="<?= Yii::getAlias('@web') . '/' . $item->user->avatar ?>"
-                                                    alt="<?= Html::encode($name) ?>" class="participant-avatar"
-                                                    style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
-                                            <?php else: ?>
-                                                <div class="avatar-initials" style="
-                                    width: 32px; 
-                                    height: 32px; 
-                                    border-radius: 50%; 
-                                    background: #007bff; 
-                                    color: white; 
-                                    display: flex; 
-                                    align-items: center; 
-                                    justify-content: center; 
-                                    font-weight: bold;
-                                    border: 2px solid #ddd;
-                                ">
-                                                    <?= Html::encode(strtoupper($initials)) ?>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
+                            <div style="display: flex; align-items: center; margin-top: 8px;">
+                                <?php
+                                $index = 0;
+                                foreach ($projectParticipants as $item):
+                                    if (!$item->user)
+                                        continue;
+
+                                    $name = $item->user->username;
+                                    $initials = mb_substr($name, 0, 1, 'UTF-8');
+                                    ?>
+                                    <div title="<?= Html::encode($name) ?>" style="
+                    position: relative;
+                    left: <?= $index * (-12) ?>px; /* ← сдвигаем каждую следующую влево */
+                    cursor: pointer;
+                    z-index: <?= count($projectParticipants) - $index ?>; /* чтобы первая была сверху */
+                ">
+                                        <?php if (!empty($item->user->avatar)): ?>
+                                            <img src="<?= Yii::getAlias('@web') . '/' . $item->user->avatar ?>"
+                                                alt="<?= Html::encode($name) ?>" style="
+                            width: 32px; 
+                            height: 32px; 
+                            border-radius: 50%; 
+                            object-fit: cover; 
+                            border: 2px solid #ddd;
+                            box-shadow: 0 0 0 2px white; /* белый бордюр для контраста */
+                        ">
+                                        <?php else: ?>
+                                            <div style="
+                        width: 32px; 
+                        height: 32px; 
+                        margin-bottom: 10px;
+                        border-radius: 50%; 
+                        background: #007bff; 
+                        color: white; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-weight: bold;
+                        border: 2px solid white; /* белый бордюр */
+                    ">
+                                                <?= Html::encode(strtoupper($initials)) ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php
+                                    $index++;
+                                endforeach; ?>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -160,6 +175,7 @@ $this->title = 'Список материалов';
 
         <!-- Модальное окно -->
         <div id="createProjectModal" class="modal">
+            <div class="modal-backdrop"></div>
             <div class="modal-content">
                 <header class="modal-header">
                     <h2>Управление проектом</h2>
@@ -215,7 +231,8 @@ $this->title = 'Список материалов';
         </div>
 
         <!-- Модальное окно выбора пользователей -->
-        <div id="selectUsersModal" class="modal" style="display: none;">
+        <div id="selectUsersModal" class="modal">
+            <div class="modal-backdrop"></div>
             <div class="modal-content" style="max-width: 600px;">
                 <header class="modal-header">
                     <h2>Выбор пользователей</h2>
@@ -254,14 +271,28 @@ $this->title = 'Список материалов';
                 participants.add(currentUserId.toString());
 
                 // === ВСЕ ФУНКЦИИ ===
+                // Функции для анимированного открытия/закрытия
+                function openModal(modalId) {
+                    const modal = document.getElementById(modalId);
+                    modal.classList.add('active');
+                    // Через 10 мс — запускаем подъём в центр
+                    setTimeout(() => modal.classList.add('animate'), 10);
+                }
+
+                function closeModal(modalId) {
+                    const modal = document.getElementById(modalId);
+                    modal.classList.remove('animate');
+                    // Через 300 мс (длительность анимации) — скрываем
+                    setTimeout(() => modal.classList.remove('active'), 300);
+                }
 
                 function openUsersModal() {
-                    document.getElementById('selectUsersModal').style.display = 'block';
+                    openModal('selectUsersModal');
                     loadUsersList();
                 }
 
                 function closeUsersModal() {
-                    document.getElementById('selectUsersModal').style.display = 'none';
+                    closeModal('selectUsersModal');
                 }
 
                 function loadUsersList() {
@@ -390,10 +421,10 @@ $this->title = 'Список материалов';
 
                 // Закрытие модалок по крестику или клику вне
                 document.querySelectorAll('.close-btn').forEach(btn => {
-                    btn.addEventListener('click', () => btn.closest('.modal').style.display = 'none');
+                    btn.addEventListener('click', () => btn.closest('.modal').classList.remove('active')); // ← изменено
                 });
                 window.addEventListener('click', e => {
-                    if (e.target.classList.contains('modal')) e.target.style.display = 'none';
+                    if (e.target.classList.contains('modal')) closeModal(e.target.id);
                 });
 
                 // Поиск в списке пользователей
@@ -414,7 +445,7 @@ $this->title = 'Список материалов';
                         document.getElementById('projectTitle').value = title;
                         document.getElementById('deleteProjectBtn').style.display = 'block';
                         loadProjectParticipants(id);
-                        document.getElementById('createProjectModal').style.display = 'block';
+                        openModal('createProjectModal');
                     });
                 });
 
@@ -426,7 +457,7 @@ $this->title = 'Список материалов';
                     participants.clear();
                     participants.add(currentUserId.toString());
                     updateParticipantsList();
-                    document.getElementById('createProjectModal').style.display = 'block';
+                    openModal('createProjectModal');
                 });
 
                 // Сохранение проекта
@@ -440,15 +471,11 @@ $this->title = 'Список материалов';
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                alert('Проект успешно сохранен!');
                                 window.location.href = '<?= \yii\helpers\Url::to(['materials/index']) ?>?projectId=' + (data.projectId || document.getElementById('projectIdInput').value);
-                            } else {
-                                alert('Ошибка: ' + data.message);
-                            }
+                            } 
                         })
                         .catch(error => {
                             console.error('Ошибка сохранения:', error);
-                            alert('Произошла ошибка при сохранении проекта.');
                         });
                 });
 
@@ -470,7 +497,6 @@ $this->title = 'Список материалов';
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                alert('Проект удалён!');
                                 window.location.href = '<?= \yii\helpers\Url::to(['materials/index']) ?>';
                             } else {
                                 alert('Ошибка: ' + data.message);
