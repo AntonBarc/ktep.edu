@@ -175,7 +175,6 @@ $this->title = 'Список материалов';
 
         <!-- Модальное окно -->
         <div id="createProjectModal" class="modal">
-            <div class="modal-backdrop"></div>
             <div class="modal-content">
                 <header class="modal-header">
                     <h2>Управление проектом</h2>
@@ -232,10 +231,9 @@ $this->title = 'Список материалов';
 
         <!-- Модальное окно выбора пользователей -->
         <div id="selectUsersModal" class="modal">
-            <div class="modal-backdrop"></div>
             <div class="modal-content" style="max-width: 600px;">
                 <header class="modal-header">
-                    <h2>Выбор пользователей</h2>
+                    <h2>Добавление участников</h2>
                     <span class="close-btn">&times;</span>
                 </header>
                 <div class="modal-body">
@@ -273,22 +271,16 @@ $this->title = 'Список материалов';
                 // === ВСЕ ФУНКЦИИ ===
                 // Функции для анимированного открытия/закрытия
                 function openModal(modalId) {
-                    const modal = document.getElementById(modalId);
-                    modal.classList.add('active');
-                    // Через 10 мс — запускаем подъём в центр
-                    setTimeout(() => modal.classList.add('animate'), 10);
+                    document.getElementById(modalId).classList.add('show');
                 }
 
                 function closeModal(modalId) {
-                    const modal = document.getElementById(modalId);
-                    modal.classList.remove('animate');
-                    // Через 300 мс (длительность анимации) — скрываем
-                    setTimeout(() => modal.classList.remove('active'), 300);
+                    document.getElementById(modalId).classList.remove('show');
                 }
 
                 function openUsersModal() {
-                    openModal('selectUsersModal');
                     loadUsersList();
+                    openModal('selectUsersModal');
                 }
 
                 function closeUsersModal() {
@@ -402,6 +394,27 @@ $this->title = 'Список материалов';
                         });
                 }
 
+                function loadProjectParticipantsAsync(projectId) {
+                    return new Promise((resolve, reject) => {
+                        fetch('<?= \yii\helpers\Url::to(['user-project/get-project-participants']) ?>?projectId=' + projectId)
+                            .then(response => response.json())
+                            .then(data => {
+                                participants.clear();
+                                data.forEach(p => participants.add(p.user_id.toString()));
+                                if (!participants.has(currentUserId.toString())) {
+                                    participants.add(currentUserId.toString());
+                                }
+                                updateParticipantsList();
+                                resolve();
+                            })
+                            .catch(error => {
+                                console.error('Ошибка загрузки участников:', error);
+                                alert('Не удалось загрузить участников проекта.');
+                                reject(error);
+                            });
+                    });
+                }
+
                 // === ОБРАБОТЧИКИ СОБЫТИЙ ===
 
                 // Кнопка "Добавить участников"
@@ -420,11 +433,20 @@ $this->title = 'Список материалов';
                 document.getElementById('cancelSelectUsers')?.addEventListener('click', closeUsersModal);
 
                 // Закрытие модалок по крестику или клику вне
+                // По крестику
                 document.querySelectorAll('.close-btn').forEach(btn => {
-                    btn.addEventListener('click', () => btn.closest('.modal').classList.remove('active')); // ← изменено
+                    btn.addEventListener('click', () => {
+                        closeModal(btn.closest('.modal').id);
+                    });
                 });
-                window.addEventListener('click', e => {
-                    if (e.target.classList.contains('modal')) closeModal(e.target.id);
+
+                // По клику вне окна
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            closeModal(modal.id);
+                        }
+                    });
                 });
 
                 // Поиск в списке пользователей
@@ -438,13 +460,15 @@ $this->title = 'Список материалов';
 
                 // Открытие модалки для редактирования проекта
                 document.querySelectorAll('.project-options-btn').forEach(btn => {
-                    btn.addEventListener('click', function () {
+                    btn.addEventListener('click', async function () {
                         const id = this.dataset.projectId;
                         const title = this.dataset.projectTitle;
                         document.getElementById('projectIdInput').value = id;
                         document.getElementById('projectTitle').value = title;
                         document.getElementById('deleteProjectBtn').style.display = 'block';
-                        loadProjectParticipants(id);
+
+                        // Ждём загрузки участников
+                        await loadProjectParticipantsAsync(id);
                         openModal('createProjectModal');
                     });
                 });
@@ -457,7 +481,7 @@ $this->title = 'Список материалов';
                     participants.clear();
                     participants.add(currentUserId.toString());
                     updateParticipantsList();
-                    openModal('createProjectModal');
+                    openModal('createProjectModal'); // ← для нового проекта данные готовы сразу
                 });
 
                 // Сохранение проекта
@@ -472,7 +496,7 @@ $this->title = 'Список материалов';
                         .then(data => {
                             if (data.success) {
                                 window.location.href = '<?= \yii\helpers\Url::to(['materials/index']) ?>?projectId=' + (data.projectId || document.getElementById('projectIdInput').value);
-                            } 
+                            }
                         })
                         .catch(error => {
                             console.error('Ошибка сохранения:', error);

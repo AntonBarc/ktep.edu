@@ -631,60 +631,41 @@ a.desc:after {
     color: white;                 /* Белый цвет текста при наведении */
 }
 
-/* === Анимация модальных окон с затемнением === */
+/* === Модальные окна с анимацией === */
 .modal {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1000;
-}
-
-.modal.active {
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
-    align-items: flex-end; /* начальное положение — внизу */
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 1000;
+    pointer-events: none; /* по умолчанию — ничего не кликабельно */
 }
 
-.modal.active.animate {
-    align-items: center; /* конечное положение — по центру */
+.modal.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto; /* включаем клики */
 }
 
-/* Затемнение фона */
-.modal-backdrop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0);
-    transition: background 0.3s ease;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.modal.active .modal-backdrop {
-    background: rgba(0, 0, 0, 0.5);
-    pointer-events: auto;
-}
-
-/* Содержимое окна */
 .modal-content {
-    position: relative;
     background: #fff;
     width: 60%;
     max-width: 600px;
     border-radius: 10px;
     overflow: hidden;
     transform: translateY(20px);
-    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    margin: 0 20px;
-    z-index: 2;
+    transition: transform 0.3s ease;
 }
 
-.modal.active.animate .modal-content {
+.modal.show .modal-content {
     transform: translateY(0);
 }
 
