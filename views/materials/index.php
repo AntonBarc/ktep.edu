@@ -72,11 +72,13 @@ $this->title = 'Список материалов';
                                     $name = $item->user->username;
                                     $initials = mb_substr($name, 0, 1, 'UTF-8');
                                     ?>
-                                    <div title="<?= Html::encode($name) ?>" style="
+                                    <div class="participant-avatar" data-project-id="<?= $currentProject->id ?>"
+                                        title="<?= Html::encode($name) ?>" style="
                     position: relative;
-                    left: <?= $index * (-12) ?>px; /* ← сдвигаем каждую следующую влево */
+                    left: <?= $index * (-10) ?>px;
                     cursor: pointer;
-                    z-index: <?= count($projectParticipants) - $index ?>; /* чтобы первая была сверху */
+                    margin-bottom: 20px;
+                    z-index: <?= count($projectParticipants) - $index ?>;
                 ">
                                         <?php if (!empty($item->user->avatar)): ?>
                                             <img src="<?= Yii::getAlias('@web') . '/' . $item->user->avatar ?>"
@@ -86,13 +88,12 @@ $this->title = 'Список материалов';
                             border-radius: 50%; 
                             object-fit: cover; 
                             border: 2px solid #ddd;
-                            box-shadow: 0 0 0 2px white; /* белый бордюр для контраста */
+                            box-shadow: 0 0 0 2px white;
                         ">
                                         <?php else: ?>
                                             <div style="
                         width: 32px; 
                         height: 32px; 
-                        margin-bottom: 10px;
                         border-radius: 50%; 
                         background: #007bff; 
                         color: white; 
@@ -100,7 +101,7 @@ $this->title = 'Список материалов';
                         align-items: center; 
                         justify-content: center; 
                         font-weight: bold;
-                        border: 2px solid white; /* белый бордюр */
+                        border: 2px solid white;
                     ">
                                                 <?= Html::encode(strtoupper($initials)) ?>
                                             </div>
@@ -352,14 +353,14 @@ $this->title = 'Список материалов';
                         }
 
                         return `
-                <div class="participant" data-user-id="${userId}">
-                    <span class="participant-name">${username}</span>
-                    <span class="participant-role">${role}</span>
-                    <span class="remove-participant" 
-                          style="cursor:pointer; color:red; margin-left:10px; ${isOwner ? 'display:none;' : ''}"
-                          title="Удалить участника">&times;</span>
-                </div>
-            `;
+                        <div class="participant" data-user-id="${userId}">
+                            <span class="participant-name">${username}</span>
+                            <span class="participant-role">${role}</span>
+                            <span class="remove-participant" 
+                                style="cursor:pointer; color:red; margin-left:10px; ${isOwner ? 'display:none;' : ''}"
+                                title="Удалить участника">&times;</span>
+                        </div>
+                    `;
                     }).join('');
 
                     participantsList.innerHTML = html;
@@ -540,6 +541,27 @@ $this->title = 'Список материалов';
                         loadProjectParticipants(projectId);
                     }
                     updateParticipantsList();
+                });
+
+                // Открытие модального окна по клику на аватарку участника
+                document.querySelectorAll('.participant-avatar').forEach(avatar => {
+                    avatar.addEventListener('click', async function () {
+                        const projectId = this.dataset.projectId;
+                        const project = <?= json_encode(array_column($projects, 'title', 'id')) ?>[projectId];
+
+                        if (!projectId) return;
+
+                        // Заполняем форму
+                        document.getElementById('projectIdInput').value = projectId;
+                        document.getElementById('projectTitle').value = project || 'Проект';
+                        document.getElementById('deleteProjectBtn').style.display = 'block';
+
+                        // Загружаем участников
+                        await loadProjectParticipantsAsync(projectId);
+
+                        // Открываем модалку
+                        openModal('createProjectModal');
+                    });
                 });
             });
 
