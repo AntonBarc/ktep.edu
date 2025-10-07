@@ -171,7 +171,51 @@ $this->title = 'Список материалов';
                         <p>Пожалуйста, выберите проект из списка слева чтобы просмотреть материалы.</p>
                     </div>
                 <?php endif; ?>
+                <!-- Конфигурация для JavaScript -->
+                <div id="js-config" style="display:none;" data-user-id="<?= Yii::$app->user->id ?>"
+                    data-username="<?= Html::encode(Yii::$app->user->identity->username) ?>"
+                    data-projects="<?= htmlspecialchars(json_encode(array_column($projects, 'title', 'id'))) ?>"
+                    data-csrf-token="<?= Yii::$app->request->csrfToken ?>" data-base-url="<?= Yii::$app->homeUrl ?>"
+                    data-users-url="<?= \yii\helpers\Url::to(['user-project/get-users']) ?>">
+                </div>
             </main>
+        </div>
+
+        <!-- Модальное окно "Создать материал" -->
+        <div id="createMaterialModal" class="modal">
+            <div class="modal-content" style="width: 80%; max-width: 600px; padding: 20px;">
+                <header class="modal-header" style="margin-bottom: 20px;">
+                    <h2>Создать материал</h2>
+                    <span class="close-btn">&times;</span>
+                </header>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                    <div class="material-type" data-type="folder"
+                        style="cursor: pointer; padding: 15px; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; gap: 10px; background: #f9f9f9;">
+                        <i class="bi bi-folder" style="font-size: 24px; color: #ffc107;"></i>
+                        <span>Папка</span>
+                    </div>
+                    <div class="material-type" data-type="course"
+                        style="cursor: pointer; padding: 15px; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; gap: 10px; background: #f9f9f9;">
+                        <i class="bi bi-file-earmark-text" style="font-size: 24px; color: #0d6efd;"></i>
+                        <span>Курс</span>
+                    </div>
+                    <div class="material-type" data-type="trajectory"
+                        style="cursor: pointer; padding: 15px; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; gap: 10px; background: #f9f9f9;">
+                        <i class="bi bi-journal-bookmark" style="font-size: 24px; color: #6f42c1;"></i>
+                        <span>Траектория обучения</span>
+                    </div>
+                    <div class="material-type" data-type="longread"
+                        style="cursor: pointer; padding: 15px; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; gap: 10px; background: #f9f9f9;">
+                        <i class="bi bi-file-richtext" style="font-size: 24px; color: #6c757d;"></i>
+                        <span>Лонгрид</span>
+                    </div>
+                    <div class="material-type" data-type="test"
+                        style="cursor: pointer; padding: 15px; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; gap: 10px; background: #f9f9f9;">
+                        <i class="bi bi-check-circle" style="font-size: 24px; color: #28a745;"></i>
+                        <span>Тест</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Модальное окно -->
@@ -253,334 +297,8 @@ $this->title = 'Список материалов';
             </div>
         </div>
 
-        <!-- Скрытое поле для хранения ID участников -->
-        <input type="hidden" id="projectParticipants" name="participants" value="">
-
-        <!-- Скрытое поле для хранения ID участников -->
-        <input type="hidden" id="projectParticipants" name="participants" value="">
-
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                // Глобальные переменные
-                const currentUserId = <?= Yii::$app->user->id ?>;
-                const participants = new Set();
-                let allUsers = {}; // ← данные всех пользователей
-
-                // Инициализация: добавляем текущего пользователя
-                participants.add(currentUserId.toString());
-
-                // === ВСЕ ФУНКЦИИ ===
-                // Функции для анимированного открытия/закрытия
-                function openModal(modalId) {
-                    document.getElementById(modalId).classList.add('show');
-                }
-
-                function closeModal(modalId) {
-                    document.getElementById(modalId).classList.remove('show');
-                }
-
-                function openUsersModal() {
-                    loadUsersList();
-                    openModal('selectUsersModal');
-                }
-
-                function closeUsersModal() {
-                    closeModal('selectUsersModal');
-                }
-
-                function loadUsersList() {
-                    return new Promise((resolve, reject) => {
-                        fetch('<?= \yii\helpers\Url::to(['user-project/get-users']) ?>')
-                            .then(response => response.json())
-                            .then(users => {
-                                allUsers = {};
-                                users.forEach(user => {
-                                    allUsers[user.id.toString()] = {
-                                        username: user.username,
-                                        role: user.role
-                                    };
-                                });
-
-                                const usersList = document.getElementById('usersList');
-                                usersList.innerHTML = users.length === 0
-                                    ? '<p>Нет пользователей для добавления</p>'
-                                    : users.map(user => {
-                                        const isCurrentUser = user.id == currentUserId;
-                                        const isAlreadyAdded = participants.has(user.id.toString());
-                                        return `
-                            <div class="user-item" style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-                                <div>
-                                    <strong>${user.username}</strong>
-                                    <span style="color:#666; margin-left:10px;">${user.role}</span>
-                                </div>
-                                <div>
-                                    <input type="checkbox" 
-                                           value="${user.id}" 
-                                           ${isAlreadyAdded || isCurrentUser ? 'checked disabled' : ''}
-                                           class="user-checkbox">
-                                </div>
-                            </div>
-                        `;
-                                    }).join('');
-
-                                resolve(); // ← сигнал, что всё загружено
-                            })
-                            .catch(error => {
-                                console.error('Ошибка загрузки пользователей:', error);
-                                document.getElementById('usersList').innerHTML = '<p>Ошибка загрузки пользователей</p>';
-                                reject(error);
-                            });
-                    });
-                }
-
-                function updateParticipantsList() {
-                    const participantsList = document.getElementById('participantsList');
-                    const participantsInput = document.getElementById('projectParticipants');
-
-                    let html = Array.from(participants).map(userId => {
-                        const isOwner = userId == currentUserId.toString();
-                        let username, role;
-
-                        if (isOwner) {
-                            username = '<?= Html::encode(Yii::$app->user->identity->username) ?>';
-                            role = 'Владелец проекта';
-                        } else if (allUsers[userId]) {
-                            username = allUsers[userId].username;
-                            role = allUsers[userId].role;
-                        } else {
-                            username = 'Пользователь #' + userId;
-                            role = 'Участник';
-                        }
-
-                        return `
-                        <div class="participant" data-user-id="${userId}">
-                            <span class="participant-name">${username}</span>
-                            <span class="participant-role">${role}</span>
-                            <span class="remove-participant" 
-                                style="cursor:pointer; color:red; margin-left:10px; ${isOwner ? 'display:none;' : ''}"
-                                title="Удалить участника">&times;</span>
-                        </div>
-                    `;
-                    }).join('');
-
-                    participantsList.innerHTML = html;
-                    participantsInput.value = Array.from(participants).join(',');
-
-                    // Обработчики удаления
-                    document.querySelectorAll('.remove-participant').forEach(btn => {
-                        btn.addEventListener('click', function () {
-                            const userId = this.closest('.participant').dataset.userId;
-                            if (userId != currentUserId.toString()) {
-                                participants.delete(userId);
-                                updateParticipantsList();
-                            }
-                        });
-                    });
-                }
-
-                function loadProjectParticipants(projectId) {
-                    fetch('<?= \yii\helpers\Url::to(['user-project/get-project-participants']) ?>?projectId=' + projectId)
-                        .then(response => response.json())
-                        .then(data => {
-                            participants.clear();
-                            data.forEach(p => participants.add(p.user_id.toString()));
-                            if (!participants.has(currentUserId.toString())) {
-                                participants.add(currentUserId.toString());
-                            }
-                            updateParticipantsList();
-                        })
-                        .catch(error => {
-                            console.error('Ошибка загрузки участников:', error);
-                            alert('Не удалось загрузить участников проекта.');
-                        });
-                }
-
-                function loadProjectParticipantsAsync(projectId) {
-                    return new Promise((resolve, reject) => {
-                        fetch('<?= \yii\helpers\Url::to(['user-project/get-project-participants']) ?>?projectId=' + projectId)
-                            .then(response => response.json())
-                            .then(data => {
-                                participants.clear();
-                                data.forEach(p => participants.add(p.user_id.toString()));
-                                if (!participants.has(currentUserId.toString())) {
-                                    participants.add(currentUserId.toString());
-                                }
-                                updateParticipantsList();
-                                resolve();
-                            })
-                            .catch(error => {
-                                console.error('Ошибка загрузки участников:', error);
-                                alert('Не удалось загрузить участников проекта.');
-                                reject(error);
-                            });
-                    });
-                }
-
-                // === ОБРАБОТЧИКИ СОБЫТИЙ ===
-
-                // Кнопка "Добавить участников"
-                document.getElementById('addParticipantBtn')?.addEventListener('click', openUsersModal);
-
-                // Подтверждение выбора
-                document.getElementById('confirmSelectUsers')?.addEventListener('click', function () {
-                    document.querySelectorAll('.user-checkbox:checked:not(:disabled)').forEach(checkbox => {
-                        participants.add(checkbox.value.toString());
-                    });
-                    updateParticipantsList();
-                    closeUsersModal();
-                });
-
-                // Отмена выбора
-                document.getElementById('cancelSelectUsers')?.addEventListener('click', closeUsersModal);
-
-                // Закрытие модалок по крестику или клику вне
-                // По крестику
-                document.querySelectorAll('.close-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        closeModal(btn.closest('.modal').id);
-                    });
-                });
-
-                // По клику вне окна
-                document.querySelectorAll('.modal').forEach(modal => {
-                    modal.addEventListener('click', (e) => {
-                        if (e.target === modal) {
-                            closeModal(modal.id);
-                        }
-                    });
-                });
-
-                // Поиск в списке пользователей
-                document.getElementById('userSearch')?.addEventListener('input', function (e) {
-                    const term = e.target.value.toLowerCase();
-                    document.querySelectorAll('.user-item').forEach(item => {
-                        const name = item.querySelector('strong').textContent.toLowerCase();
-                        item.style.display = name.includes(term) ? 'flex' : 'none';
-                    });
-                });
-
-                // Открытие модалки для редактирования проекта
-                document.querySelectorAll('.project-options-btn').forEach(btn => {
-                    btn.addEventListener('click', async function () {
-                        const id = this.dataset.projectId;
-                        const title = this.dataset.projectTitle;
-                        document.getElementById('projectIdInput').value = id;
-                        document.getElementById('projectTitle').value = title;
-                        document.getElementById('deleteProjectBtn').style.display = 'block';
-
-                        // Ждём загрузки участников
-                        await loadProjectParticipantsAsync(id);
-                        openModal('createProjectModal');
-                    });
-                });
-
-                // Создание нового проекта
-                document.querySelector('.add-project-btn')?.addEventListener('click', function () {
-                    document.getElementById('projectIdInput').value = '';
-                    document.getElementById('projectTitle').value = '';
-                    document.getElementById('deleteProjectBtn').style.display = 'none';
-                    participants.clear();
-                    participants.add(currentUserId.toString());
-                    updateParticipantsList();
-                    openModal('createProjectModal'); // ← для нового проекта данные готовы сразу
-                });
-
-                // Сохранение проекта
-                document.getElementById('saveProjectBtn')?.addEventListener('click', function () {
-                    const form = document.getElementById('manageProjectForm');
-                    const formData = new FormData(form);
-                    fetch('<?= \yii\helpers\Url::to(['materials/manage-project']) ?>', {
-                        method: 'POST',
-                        body: formData,
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                window.location.href = '<?= \yii\helpers\Url::to(['materials/index']) ?>?projectId=' + (data.projectId || document.getElementById('projectIdInput').value);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Ошибка сохранения:', error);
-                        });
-                });
-
-                // Удаление проекта
-                document.getElementById('deleteProjectBtn')?.addEventListener('click', function () {
-                    const id = document.getElementById('projectIdInput').value;
-                    const title = document.getElementById('projectTitle').value;
-                    if (!id) return alert('Проект не выбран.');
-                    if (!confirm(`Удалить проект "${title}" и все материалы?`)) return;
-
-                    fetch('<?= \yii\helpers\Url::to(['materials/delete-project']) ?>', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-CSRF-Token': '<?= Yii::$app->request->csrfToken ?>'
-                        },
-                        body: 'id=' + id
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                window.location.href = '<?= \yii\helpers\Url::to(['materials/index']) ?>';
-                            } else {
-                                alert('Ошибка: ' + data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Ошибка удаления:', error);
-                            alert('Ошибка при удалении проекта.');
-                        });
-                });
-
-                loadUsersList().then(() => {
-                    // После этого можно безопасно загружать участников проекта (если projectId известен)
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const projectId = urlParams.get('projectId');
-                    if (projectId) {
-                        loadProjectParticipants(projectId);
-                    }
-                    updateParticipantsList();
-                });
-
-                // Открытие модального окна по клику на аватарку участника
-                document.querySelectorAll('.participant-avatar').forEach(avatar => {
-                    avatar.addEventListener('click', async function () {
-                        const projectId = this.dataset.projectId;
-                        const project = <?= json_encode(array_column($projects, 'title', 'id')) ?>[projectId];
-
-                        if (!projectId) return;
-
-                        // Заполняем форму
-                        document.getElementById('projectIdInput').value = projectId;
-                        document.getElementById('projectTitle').value = project || 'Проект';
-                        document.getElementById('deleteProjectBtn').style.display = 'block';
-
-                        // Загружаем участников
-                        await loadProjectParticipantsAsync(projectId);
-
-                        // Открываем модалку
-                        openModal('createProjectModal');
-                    });
-                });
-            });
-
-            // Обработчик для кнопки "Создать"
-            document.getElementById('createBtn')?.addEventListener('click', function () {
-                document.getElementById('fileInputCreate')?.click();
-            });
-
-            // Обработчик для кнопки "Загрузить"
-            document.getElementById('uploadBtn')?.addEventListener('click', function () {
-                document.getElementById('fileInputUpload')?.click();
-            });
-
-            // Автоматическая отправка формы при выборе файла
-            document.getElementById('fileInputCreate')?.addEventListener('change', function () {
-                this.form.submit();
-            });
-
-            document.getElementById('fileInputUpload')?.addEventListener('change', function () {
-                this.form.submit();
-            });
-        </script>
+        <?php
+        $this->registerJsFile('@web/js/materials-index.js', [
+            'depends' => [\yii\web\JqueryAsset::class]
+        ]);
+        ?>
