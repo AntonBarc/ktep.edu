@@ -201,4 +201,32 @@ class MaterialsController extends Controller
         Yii::$app->session->setFlash('error', 'Не удалось загрузить файл.');
         return $this->redirect(['index', 'projectId' => $model->project_id ?? null]);
     }
+
+    // В MaterialsController.php
+
+    public function actionCreateMaterial()
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+
+        $projectId = Yii::$app->request->post('project_id');
+        $type = Yii::$app->request->post('type');
+        $title = Yii::$app->request->post('title', 'Новый материал');
+
+        // Проверка типа
+        if (!in_array($type, array_keys(\app\models\Material::typesList()))) {
+            return ['success' => false, 'message' => 'Неверный тип материала'];
+        }
+
+        $material = new \app\models\Material();
+        $material->project_id = $projectId;
+        $material->type = $type;
+        $material->title = $title;
+        $material->author_id = Yii::$app->user->id;
+
+        if ($material->save()) {
+            return ['success' => true, 'material' => $material];
+        }
+
+        return ['success' => false, 'message' => 'Ошибка создания материала'];
+    }
 }

@@ -42,20 +42,21 @@ document.addEventListener('DOMContentLoaded', function () {
         async loadUsers() {
             try {
                 const configEl = document.getElementById('js-config');
-                const usersUrl = configEl.dataset.usersUrl;
-                const response = await fetch(utils.url('user-project/get-users'));
-                if (!response.ok) throw new Error('Network error');
+                const response = await fetch(configEl.dataset.usersUrl);
                 const users = await response.json();
+
+                console.log('Получены пользователи:', users); // ← добавьте эту строку
 
                 state.allUsers = users.reduce((acc, user) => {
                     acc[user.id.toString()] = { username: user.username, role: user.role };
                     return acc;
                 }, {});
 
+                console.log('state.allUsers:', state.allUsers); // ← и эту
+
                 return users;
             } catch (error) {
                 console.error('Ошибка загрузки пользователей:', error);
-                document.getElementById('usersList').innerHTML = '<p>Ошибка загрузки пользователей</p>';
                 throw error;
             }
         },
@@ -126,28 +127,38 @@ document.addEventListener('DOMContentLoaded', function () {
         },
 
         renderUsersList(users) {
-            const usersList = document.getElementById('usersList');
-            if (!usersList) return;
+            const usersList = document.querySelector('#selectUsersModal #usersList');
+            if (!usersList) {
+                console.error('Элемент #usersList не найден!');
+                return;
+            }
 
-            usersList.innerHTML = users.length === 0
+            // Получаем массив [id, user] для сохранения ID
+            const usersWithId = Object.entries(state.allUsers).map(([id, user]) => ({
+                id: parseInt(id),
+                username: user.username,
+                role: user.role
+            }));
+
+            usersList.innerHTML = usersWithId.length === 0
                 ? '<p>Нет пользователей для добавления</p>'
-                : users.map(user => {
+                : usersWithId.map(user => {
                     const isCurrentUser = user.id == config.currentUserId;
                     const isAlreadyAdded = state.participants.has(user.id.toString());
                     return `
-                        <div class="user-item" style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-                            <div>
-                                <strong>${user.username}</strong>
-                                <span style="color:#666; margin-left:10px;">${user.role}</span>
-                            </div>
-                            <div>
-                                <input type="checkbox" 
-                                       value="${user.id}" 
-                                       ${isAlreadyAdded || isCurrentUser ? 'checked disabled' : ''}
-                                       class="user-checkbox">
-                            </div>
-                        </div>
-                    `;
+                <div class="user-item" style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <strong>${user.username}</strong>
+                        <span style="color:#666; margin-left:10px;">${user.role}</span>
+                    </div>
+                    <div>
+                        <input type="checkbox" 
+                               value="${user.id}" 
+                               ${isAlreadyAdded || isCurrentUser ? 'checked disabled' : ''}
+                               class="user-checkbox">
+                    </div>
+                </div>
+            `;
                 }).join('');
         }
     };
@@ -269,9 +280,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         bindUserEvents() {
             document.getElementById('addParticipantBtn')?.addEventListener('click', async () => {
+                // Сначала открываем окно
+                utils.openModal('selectUsersModal');
+
+                // Ждём, пока DOM обновится (микрозадержка)
+                await new Promise(resolve => setTimeout(resolve, 50));
+
+                // Загружаем и отображаем пользователей
                 await api.loadUsers();
                 ui.renderUsersList(Object.values(state.allUsers));
-                utils.openModal('selectUsersModal');
             });
 
             document.getElementById('confirmSelectUsers')?.addEventListener('click', () => {
@@ -302,10 +319,39 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             document.querySelectorAll('.material-type').forEach(item => {
-                item.addEventListener('click', () => {
+                item.addEventListener('click', async () => {
                     const type = item.dataset.type;
-                    console.log('Выбран тип:', type);
-                    utils.closeModal('createMaterialModal');
+                    const configEl = document.getElementById('js-config');
+                    const projectId = parseInt(configEl.dataset.projectId) || null;
+
+                    if (!projectId) {
+                        utils.showAlert('Сначала выберите проект');
+                        return;
+                    }
+
+                    // Создаём материал
+                    try {
+                        const response = await fetch(utils.url('materials/create-material'), {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-CSRF-Token': config.csrfToken
+                            },
+                            body: `project_id=${projectId}&type=${type}&title=Новый ${item.querySelector('span').textContent}`
+                        });
+
+                        const result = await response.json();
+                        if (result.success) {
+                            utils.closeModal('createMaterialModal');
+                            // Обновляем список материалов
+                            window.location.reload();
+                        } else {
+                            utils.showAlert('Ошибка: ' + result.message);
+                        }
+                    } catch (error) {
+                        console.error('Ошибка создания материала:', error);
+                        utils.showAlert('Не удалось создать материал');
+                    }
                 });
             });
         },
@@ -322,6 +368,98 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     };
+    // Внутри DOMContentLoaded
+
+    // Сортировка
+    document.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const sortField = btn.dataset.sort;
+            console.log('Сортировка по:', sortField);
+            // Здесь можно реализовать сортировку на стороне сервера или клиента
+            alert(`Сортировка по ${sortField} (реализуется позже)`);
+        });
+    });
+
+    // Выбор всех элементов
+    document.querySelector('.select-all-checkbox')?.addEventListener('change', function () {
+        const checkboxes = document.querySelectorAll('.material-checkbox');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    // Выбор одного элемента
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('material-checkbox')) {
+            const allCheckboxes = document.querySelectorAll('.material-checkbox');
+            const selectAll = document.querySelector('.select-all-checkbox');
+            selectAll.checked = Array.from(allCheckboxes).every(cb => cb.checked);
+        }
+    });
+    // Внутри DOMContentLoaded
+
+// Состояние сортировки
+const sortState = {
+    field: 'title', // поле по умолчанию
+    direction: 'asc'    // направление по умолчанию
+};
+
+// Обновление отображения стрелок
+function updateSortArrows() {
+    document.querySelectorAll('.sort-arrow').forEach(arrow => {
+        const field = arrow.dataset.field;
+        // Скрываем все стрелки
+        arrow.classList.remove('active', 'desc');
+        // Показываем активную стрелку
+        if (field === sortState.field) {
+            arrow.classList.add('active');
+            if (sortState.direction === 'desc') {
+                arrow.classList.add('desc');
+            }
+        }
+    });
+}
+
+// Обработчик клика по заголовку
+document.querySelectorAll('.materials-header .header-cell[data-sort]').forEach(cell => {
+    cell.addEventListener('click', () => {
+        const field = cell.dataset.sort;
+        
+        if (field === sortState.field) {
+            // Переключаем направление
+            sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Новое поле - сортировка по возрастанию
+            sortState.field = field;
+            sortState.direction = 'asc';
+        }
+        
+        updateSortArrows();
+        performSorting();
+    });
+});
+
+// Функция сортировки (заглушка - реализуйте по своему усмотрению)
+function performSorting() {
+    console.log('Сортировка:', sortState.field, sortState.direction);
+    
+    // Здесь можно:
+    // 1. Отправить AJAX-запрос на сервер с параметрами сортировки
+    // 2. Или отсортировать данные на клиенте (если их немного)
+    
+    // Пример AJAX-запроса:
+    /*
+    fetch(`${utils.url('materials/index')}?projectId=${config.projectId}&sort=${sortState.field}&order=${sortState.direction}`)
+        .then(response => response.text())
+        .then(html => {
+            // Обновить только таблицу материалов
+            document.querySelector('.materials-body').innerHTML = 
+                new DOMParser().parseFromString(html, 'text/html')
+                    .querySelector('.materials-body').innerHTML;
+        });
+    */
+}
+
+// Инициализация при загрузке страницы
+updateSortArrows();
 
     // === ИНИЦИАЛИЗАЦИЯ ===
     async function init() {

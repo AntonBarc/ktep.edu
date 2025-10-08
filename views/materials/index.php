@@ -126,8 +126,7 @@ $this->title = 'Список материалов';
                             <button class="create-btn" type="button" id="createBtn">Создать</button>
                             <?php ActiveForm::end(); ?>
                         <?php else: ?>
-                            <button class="create-btn" type="button" disabled
-                                title="Сначала выберите проект">Создать</button>
+                            <button class="create-btn" type="button" id="createBtn">Создать</button>
                         <?php endif; ?>
 
                         <?php if ($currentProject): ?>
@@ -148,24 +147,104 @@ $this->title = 'Список материалов';
                 </header>
 
                 <?php if ($currentProject): ?>
-                    <table class="content-table">
-                        <thead>
-                            <tr>
-                                <th>Название</th>
-                                <th>Файл</th>
-                                <th>Дата добавления</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                    <div class="materials-list">
+                        <!-- Заголовок таблицы -->
+                        <div class="materials-header">
+                            <div class="header-cell checkbox-col">
+                                <input type="checkbox" id="select-all" class="select-all-checkbox">
+                            </div>
+                            <div class="header-cell name-col" data-sort="title">
+                                <span>Название</span>
+                                <span class="sort-arrow" data-field="title"></span>
+                            </div>
+                            <div class="header-cell type-col" data-sort="type">
+                                <span>Тип</span>
+                                <span class="sort-arrow" data-field="type"></span>
+                            </div>
+                            <div class="header-cell assignment-col" data-sort="assignment">
+                                <span>Назначения</span>
+                                <span class="sort-arrow" data-field="assignment"></span>
+                            </div>
+                            <div class="header-cell author-col" data-sort="author">
+                                <span>Автор</span>
+                                <span class="sort-arrow" data-field="author"></span>
+                            </div>
+                            <div class="header-cell date-col" data-sort="created_at">
+                                <span>Добавлено</span>
+                                <span class="sort-arrow" data-field="created_at"></span>
+                            </div>
+                            <div class="header-cell settings-col">
+                                <i class="bi bi-gear"></i>
+                            </div>
+                        </div>
+
+                        <!-- Тело таблицы -->
+                        <div class="materials-body">
                             <?php foreach ($materials as $material): ?>
-                                <tr>
-                                    <td><?= Html::encode($material->title) ?></td>
-                                    <td><a href="<?= Yii::getAlias('@web/' . $material->file_path) ?>" download>Скачать</a></td>
-                                    <td><?= date('d.m.Y', strtotime($material->created_at)) ?></td>
-                                </tr>
+                                <div class="material-row" data-id="<?= $material->id ?>">
+                                    <div class="row-cell checkbox-col">
+                                        <input type="checkbox" class="material-checkbox" value="<?= $material->id ?>">
+                                    </div>
+                                    <div class="row-cell name-col">
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <!-- Иконка -->
+                                            <?php
+                                            $icon = '';
+                                            switch ($material->type) {
+                                                case 'folder':
+                                                    $icon = 'bi-folder';
+                                                    break;
+                                                case 'course':
+                                                    $icon = 'bi-file-earmark-text';
+                                                    break;
+                                                case 'trajectory':
+                                                    $icon = 'bi-journal-bookmark';
+                                                    break;
+                                                case 'longread':
+                                                    $icon = 'bi-file-richtext';
+                                                    break;
+                                                case 'test':
+                                                    $icon = 'bi-check-circle';
+                                                    break;
+                                                case 'assignment':
+                                                    $icon = 'bi-pencil-square';
+                                                    break;
+                                                case 'link':
+                                                    $icon = 'bi-link-45deg';
+                                                    break;
+                                                default:
+                                                    $icon = 'bi-file-earmark';
+                                            }
+                                            ?>
+                                            <i class="bi <?= $icon ?>" style="font-size: 20px; color: #6c757d;"></i>
+                                            <span><?= Html::encode($material->title) ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="row-cell type-col">
+                                        <?= \app\models\Material::typesList()[$material->type] ?? 'Неизвестно' ?>
+                                    </div>
+                                    <div class="row-cell assignment-col">
+                                        <?php
+                                        // Если материал назначается конкретным пользователям — покажем "Назначен"
+                                        // Пока просто показываем "-", если нет назначений
+                                        echo '-';
+                                        ?>
+                                    </div>
+                                    <div class="row-cell author-col">
+                                        <?= Html::encode($material->author ? $material->author->username : 'Неизвестно') ?>
+                                    </div>
+                                    <div class="row-cell date-col">
+                                        <?= date('d M Y, H:i', strtotime($material->created_at)) ?>
+                                    </div>
+                                    <div class="row-cell settings-col">
+                                        <button class="settings-btn" title="Настройки">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                        </div>
+                    </div>
                 <?php else: ?>
                     <div class="no-project-selected">
                         <p>Пожалуйста, выберите проект из списка слева чтобы просмотреть материалы.</p>
@@ -176,7 +255,8 @@ $this->title = 'Список материалов';
                     data-username="<?= Html::encode(Yii::$app->user->identity->username) ?>"
                     data-projects="<?= htmlspecialchars(json_encode(array_column($projects, 'title', 'id'))) ?>"
                     data-csrf-token="<?= Yii::$app->request->csrfToken ?>" data-base-url="<?= Yii::$app->homeUrl ?>"
-                    data-users-url="<?= \yii\helpers\Url::to(['user-project/get-users']) ?>">
+                    data-users-url="<?= \yii\helpers\Url::to(['user-project/get-users']) ?>"
+                    data-project-id="<?= (int) $projectId ?: '' ?>">
                 </div>
             </main>
         </div>
@@ -198,11 +278,6 @@ $this->title = 'Список материалов';
                         style="cursor: pointer; padding: 15px; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; gap: 10px; background: #f9f9f9;">
                         <i class="bi bi-file-earmark-text" style="font-size: 24px; color: #0d6efd;"></i>
                         <span>Курс</span>
-                    </div>
-                    <div class="material-type" data-type="trajectory"
-                        style="cursor: pointer; padding: 15px; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; gap: 10px; background: #f9f9f9;">
-                        <i class="bi bi-journal-bookmark" style="font-size: 24px; color: #6f42c1;"></i>
-                        <span>Траектория обучения</span>
                     </div>
                     <div class="material-type" data-type="longread"
                         style="cursor: pointer; padding: 15px; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; gap: 10px; background: #f9f9f9;">
