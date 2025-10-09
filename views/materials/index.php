@@ -372,6 +372,36 @@ $this->title = 'Список материалов';
             </div>
         </div>
 
+        <!-- Модальное окно "Создать папку" -->
+        <div id="createFolderModal" class="modal">
+            <div class="modal-content" style="width: 90%; max-width: 500px; padding: 20px;">
+                <header class="modal-header" style="margin-bottom: 20px;">
+                    <h2>Создать папку</h2>
+                    <span class="close-btn">&times;</span>
+                </header>
+
+                <div class="modal-body">
+                    <label for="folderName" style="display: block; margin-bottom: 8px; font-weight: bold;">
+                        Название папки
+                    </label>
+                    <input type="text" id="folderName" placeholder="Введите название папки"
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 20px;">
+                </div>
+
+                <footer class="modal-footer"
+                    style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 0;">
+                    <button type="button" class="btn btn-secondary" id="cancelFolderBtn"
+                        style="padding: 8px 16px; border: 1px solid #ccc; border-radius: 4px; background: grey; cursor: pointer;">
+                        Отмена
+                    </button>
+                    <button type="button" class="btn btn-primary" id="createFolderBtn"
+                        style="padding: 8px 16px; border: none; border-radius: 4px; background: #007bff; color: white; cursor: pointer;">
+                        Создать
+                    </button>
+                </footer>
+            </div>
+        </div>
+
         <?php
         $this->registerJsFile('@web/js/materials-index.js', [
             'depends' => [\yii\web\JqueryAsset::class]

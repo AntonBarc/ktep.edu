@@ -313,14 +313,26 @@ document.addEventListener('DOMContentLoaded', function () {
         },
 
         bindMaterialEvents() {
+            // Обработчик кнопки "Создать"
             document.getElementById('createBtn')?.addEventListener('click', (e) => {
                 e.preventDefault();
                 utils.openModal('createMaterialModal');
             });
 
+            // Обработка выбора типа материала
             document.querySelectorAll('.material-type').forEach(item => {
                 item.addEventListener('click', async () => {
                     const type = item.dataset.type;
+
+                    // Если выбрана папка - открываем специальное окно
+                    if (type === 'folder') {
+                        utils.closeModal('createMaterialModal');
+                        utils.openModal('createFolderModal');
+                        document.getElementById('folderName').focus();
+                        return;
+                    }
+
+                    // Для других типов - создание как обычно
                     const configEl = document.getElementById('js-config');
                     const projectId = parseInt(configEl.dataset.projectId) || null;
 
@@ -329,7 +341,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         return;
                     }
 
-                    // Создаём материал
                     try {
                         const response = await fetch(utils.url('materials/create-material'), {
                             method: 'POST',
@@ -343,7 +354,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         const result = await response.json();
                         if (result.success) {
                             utils.closeModal('createMaterialModal');
-                            // Обновляем список материалов
                             window.location.reload();
                         } else {
                             utils.showAlert('Ошибка: ' + result.message);
@@ -353,6 +363,58 @@ document.addEventListener('DOMContentLoaded', function () {
                         utils.showAlert('Не удалось создать материал');
                     }
                 });
+            });
+
+            // Обработчики для окна создания папки
+            document.getElementById('cancelFolderBtn')?.addEventListener('click', () => {
+                utils.closeModal('createFolderModal');
+                document.getElementById('folderName').value = '';
+            });
+
+            document.getElementById('createFolderBtn')?.addEventListener('click', async () => {
+                const folderName = document.getElementById('folderName').value.trim();
+
+                if (!folderName) {
+                    utils.showAlert('Введите название папки');
+                    return;
+                }
+
+                const configEl = document.getElementById('js-config');
+                const projectId = parseInt(configEl.dataset.projectId) || null;
+
+                if (!projectId) {
+                    utils.showAlert('Сначала выберите проект');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(utils.url('materials/create-material'), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRF-Token': config.csrfToken
+                        },
+                        body: `project_id=${projectId}&type=folder&title=${encodeURIComponent(folderName)}`
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        utils.closeModal('createFolderModal');
+                        document.getElementById('folderName').value = '';
+                        window.location.reload();
+                    } else {
+                        utils.showAlert('Ошибка: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error('Ошибка создания папки:', error);
+                    utils.showAlert('Не удалось создать папку');
+                }
+            });
+
+            // Закрытие по крестику
+            document.querySelector('#createFolderModal .close-btn')?.addEventListener('click', () => {
+                utils.closeModal('createFolderModal');
+                document.getElementById('folderName').value = '';
             });
         },
 
@@ -396,70 +458,70 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     // Внутри DOMContentLoaded
 
-// Состояние сортировки
-const sortState = {
-    field: 'title', // поле по умолчанию
-    direction: 'asc'    // направление по умолчанию
-};
+    // Состояние сортировки
+    const sortState = {
+        field: 'title', // поле по умолчанию
+        direction: 'asc'    // направление по умолчанию
+    };
 
-// Обновление отображения стрелок
-function updateSortArrows() {
-    document.querySelectorAll('.sort-arrow').forEach(arrow => {
-        const field = arrow.dataset.field;
-        // Скрываем все стрелки
-        arrow.classList.remove('active', 'desc');
-        // Показываем активную стрелку
-        if (field === sortState.field) {
-            arrow.classList.add('active');
-            if (sortState.direction === 'desc') {
-                arrow.classList.add('desc');
+    // Обновление отображения стрелок
+    function updateSortArrows() {
+        document.querySelectorAll('.sort-arrow').forEach(arrow => {
+            const field = arrow.dataset.field;
+            // Скрываем все стрелки
+            arrow.classList.remove('active', 'desc');
+            // Показываем активную стрелку
+            if (field === sortState.field) {
+                arrow.classList.add('active');
+                if (sortState.direction === 'desc') {
+                    arrow.classList.add('desc');
+                }
             }
-        }
-    });
-}
-
-// Обработчик клика по заголовку
-document.querySelectorAll('.materials-header .header-cell[data-sort]').forEach(cell => {
-    cell.addEventListener('click', () => {
-        const field = cell.dataset.sort;
-        
-        if (field === sortState.field) {
-            // Переключаем направление
-            sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
-        } else {
-            // Новое поле - сортировка по возрастанию
-            sortState.field = field;
-            sortState.direction = 'asc';
-        }
-        
-        updateSortArrows();
-        performSorting();
-    });
-});
-
-// Функция сортировки (заглушка - реализуйте по своему усмотрению)
-function performSorting() {
-    console.log('Сортировка:', sortState.field, sortState.direction);
-    
-    // Здесь можно:
-    // 1. Отправить AJAX-запрос на сервер с параметрами сортировки
-    // 2. Или отсортировать данные на клиенте (если их немного)
-    
-    // Пример AJAX-запроса:
-    /*
-    fetch(`${utils.url('materials/index')}?projectId=${config.projectId}&sort=${sortState.field}&order=${sortState.direction}`)
-        .then(response => response.text())
-        .then(html => {
-            // Обновить только таблицу материалов
-            document.querySelector('.materials-body').innerHTML = 
-                new DOMParser().parseFromString(html, 'text/html')
-                    .querySelector('.materials-body').innerHTML;
         });
-    */
-}
+    }
 
-// Инициализация при загрузке страницы
-updateSortArrows();
+    // Обработчик клика по заголовку
+    document.querySelectorAll('.materials-header .header-cell[data-sort]').forEach(cell => {
+        cell.addEventListener('click', () => {
+            const field = cell.dataset.sort;
+
+            if (field === sortState.field) {
+                // Переключаем направление
+                sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                // Новое поле - сортировка по возрастанию
+                sortState.field = field;
+                sortState.direction = 'asc';
+            }
+
+            updateSortArrows();
+            performSorting();
+        });
+    });
+
+    // Функция сортировки (заглушка - реализуйте по своему усмотрению)
+    function performSorting() {
+        console.log('Сортировка:', sortState.field, sortState.direction);
+
+        // Здесь можно:
+        // 1. Отправить AJAX-запрос на сервер с параметрами сортировки
+        // 2. Или отсортировать данные на клиенте (если их немного)
+
+        // Пример AJAX-запроса:
+        /*
+        fetch(`${utils.url('materials/index')}?projectId=${config.projectId}&sort=${sortState.field}&order=${sortState.direction}`)
+            .then(response => response.text())
+            .then(html => {
+                // Обновить только таблицу материалов
+                document.querySelector('.materials-body').innerHTML = 
+                    new DOMParser().parseFromString(html, 'text/html')
+                        .querySelector('.materials-body').innerHTML;
+            });
+        */
+    }
+
+    // Инициализация при загрузке страницы
+    updateSortArrows();
 
     // === ИНИЦИАЛИЗАЦИЯ ===
     async function init() {
